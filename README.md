@@ -69,37 +69,14 @@ It will generate
 
 ## Stage3: Site data. 
 
-1. Copy images generated previouslt to images folder. 
+1. Prepare all data for site and copy relevant data. 
 
-*crop_copy_dir.py*
-
--i <image folder> 
--o <output folder>
+*python copy_files_to_site.py -i <folder with composition> -o site*
  
-It will crop them. 
-
-2. Extract measure score timing per index of measure. 
-
-*mxl_timing.py*
-
--i <mxl file>
--o <json with index to time>
- 
-3. Now we need start time of each system image. 
-Copy the 
-*synctoolbox/F.Liszt_Dante_Sonata_S.161_No.7* into  *site/timing/F.Liszt_Dante_Sonata_S.161_No.7*
-
-run *score_to_youtube_timing.py*
-
-The flow: 
-
-Measure index -> Measure timing -> CSV + timing -> Youtube Timing 
-Image index -> Measure index -> Youtube Time in sec
-
-4. Prepare image to youtube timing in for page3.html 
+2. Prepare *image_to_youtube_timing* in for page3.html 
 
 run 
-**python images_to_links.py -yn F.Liszt_Dante_Sonata_S.161_No.7_youtube_to_name.json -yt site\timings\F.Liszt_Dante_Sonata_S.161_No.7\youtube_score_mappings -im site\images_metadata\F.Liszt_Dante_Sonata_S.161_No.7.json -i site\images\F.Liszt_Dante_Sonata_S.161_No.7 -o F.Liszt_Dante_Sonata_S.161_No.7_image_links.json**
+*python images_to_links.py -yn youtube_to_name.json -yt site/timings/<composition>/youtube_score_mappings -im site/images_metadata/<composition>.json -i site/images/<composition> -o site/timings/composition/<composition>_image_links.json*
 
 This file unifies all data to generate youtube timings per image
 
