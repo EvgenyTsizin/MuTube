@@ -1,5 +1,3 @@
-# MuTube
-
 # Flow 
 
 ## Stage1: Sync youtube with mxl. 
@@ -15,6 +13,7 @@ run:
 ```synctoolbox/youtube_extract.py -i <file_with_links.txt>```
 
 *output_folder* - a subfolder where the *file_with_links.txt* is located
+*youtube_to_names.json* - a conversion from youtube_link to folder, json 
 
 2. Extract *<composition>.csv* from *<composition>.mxl*
 
@@ -55,18 +54,18 @@ run
 
 will be saved to <folder where>/ocr_results.json
 
-**After you have run ocr you can continue to this code**
+3. Extract Measures and Crop images 
 
-3. Run **mxl_to_svg.py** now with *report_measures* and extract measures location and indeces in each image.
+run 
+```extarct_measures.py -i <composition folder>```
 
-output_directory = "output_directory2"
-output_json = "island_locations.json"
+the utility assumes 
+*images* - subfolder with images 
+*ocr_results.json* - ocr result is in the folder
 
-report_measures(output_directory, output_json)
-
-*It uses hardcoded inside a function:*
-
-**r'output_directory2\ocr\all_results.json'**
+It will generate 
+*cropped_images* - folder with croped images 
+*island_locations.json* - with measure index and measure lines per image
 
 ## Stage3: Site data. 
 
