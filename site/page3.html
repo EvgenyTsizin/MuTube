@@ -25,7 +25,7 @@
         .video-title {
             font-weight: bold;
             margin-top: 15px;
-			margin-bottom: 10px;
+            margin-bottom: 10px;
             font-size: 1.8em; /* Add this line to increase the font size */
         }
         iframe {
@@ -41,6 +41,8 @@
             const name = params.get('name');
             const image = params.get('image');
             const imagePath = `images/${name}/${image}`;
+            const timingsPath = `timings/${name}/image_links_hands_sorted.json`;
+            const youtubeToNamePath = `timings/${name}/youtube_to_name.json`;
 
             // Display the image
             const imgElement = document.getElementById('image');
@@ -48,14 +50,14 @@
             imgElement.alt = image;
 
             // Fetch the JSON data
-            fetch(`timings/${name}/image_links_hands_sorted.json`)
+            fetch(timingsPath)
                 .then(response => response.json())
                 .then(data => {
                     const videoData = data[image] || [];
                     const videoContainer = document.getElementById('videos');
 
                     // Fetch the YouTube to name JSON data
-                    fetch(`timings/${name}/youtube_to_name.json`)
+                    fetch(youtubeToNamePath)
                         .then(response => response.json())
                         .then(names => {
                             // Create and embed YouTube videos
