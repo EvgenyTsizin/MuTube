@@ -1,4 +1,59 @@
-# Flow 
+# Batch Flow 
+
+1. Batch flow starts from list of html pages with youtube embeds per query. 
+
+You need to prepare file with queries (music pieces)
+You will also need youtube api key 
+
+run: 
+```Tools/music_piece_searcher.py -f <search file> -k <youtube_api_key>```
+
+*search file* - this is the file with search terms, each line is a search
+*youtube_api_key* - youtube api key will need to work with google cloud services 
+https://developers.google.com/youtube/registering_an_application
+
+The run will create an array of html files *youtube_report_<index>.html* with 100 youtube, each html per search term. It will also create *youtube_report_<index>.json* with all youtube keys.
+
+2. In this step the user chooses the youtubes he want to be present in the site.
+
+2.1 Run local server in the htmls folder:
+*python -m http.server 8000*
+
+2.2 Open local link like this:
+*http://localhost:8000/youtube_report_<index>.html*
+
+This will allow to save json locally after you finish your work. 
+
+2.3 Start your hand pick selection. Open each html file and select your youtubes marking them as *Good* using radio button. After you finish select in the end of the page *save ratings*.
+
+3. Utility will run over all jsons created in step 1 and generate new json with all selected youtubes. 
+
+The expected *youtubes.json* file will contain a list of tuples: 
+(<search term (piece name>, [<list youtube keys>])
+
+** TODO ** make this utility. There is no utility yet - because I didn't knew I need to use localhost. 
+
+4. Download each musical piece .mxl format from https://musescore.com/ into same folder.
+
+5. Now you will need to associete *youtube search* with *score sheet name*.
+
+place the *youtubes.json* and all *name.mxl* files into same folder.  
+run
+```python Tools/attach_musicfile_to_name.py <folder>```
+
+*folder* - pass the folder with all the mentioned data. 
+
+The script will generate *youtube_with_notes.json* this file will have all the data for the next step.
+
+6. Download all data needed from youtubes.
+
+run
+```python Tools/youtube_download_extract.py -i <youtube_with_notes.json>```
+
+This script will download youtubes into the same folder as the input json 
+
+
+# Old Flow 
 
 ## Stage1: Sync youtube with mxl. 
 
@@ -10,7 +65,7 @@
 1. Extract youtube videos to mp3 and frames 
 
 run:
-```python youtube_extract.py -i <file_with_links.txt>```
+```python synctoolbox/youtube_extract.py -i <file_with_links.txt>```
 
 *output_folder* - a subfolder where the *file_with_links.txt* is located
 *youtube_to_names.json* - a conversion from youtube_link to folder, json 
@@ -20,13 +75,13 @@ run:
 *<composition>.mxl* Downloaded from musescore 
 
 run:
-```python mxl_to_mp3.py -i path/<composition>.mxl```
+```python synctoolbox/mxl_to_mp3.py -i <composition>.mxl```
 
 *output* - will save .mp3 replacing mxl 
 
 3. Convert all mp3 extracted from youtube to wav inside the subfolder <composition>: 
 run 
-```python mp3_to_wav.py -i <composition folder>```
+```python synctoolbox/mp3_to_wav.py -i <composition>```
 
 4. Sync <composition>.wav with wav files from youtube videos
 
@@ -71,12 +126,12 @@ It will generate
 
 1. Prepare all data for site and copy relevant data. 
 
-*python copy_files_to_site.py -i <composition folder> [-o site]*
+*python copy_files_to_site.py -i <folder with composition> [-o site]*
  
 2. Prepare *image_to_youtube_timing* in for page3.html 
 
 run 
-*python images_to_links.py -c <composition name> [-o site]
+*python images_to_links.py -c <composition> [-o site]
 
 This file unifies all data to generate youtube timings per image
 
