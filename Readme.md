@@ -1,6 +1,6 @@
 # What is MuTube?
 
-The project is enspired by YouGlish just for musical notes. 
+The project is enspired by [YouGlish](https://youglish.com/) just for musical notes (currently focused on piano). 
 
 The idea is that the user can choose/photograph notes from some musical piece played by different performers,
 and watch how different maestros played the selected notes. 
