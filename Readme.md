@@ -1,12 +1,20 @@
-# To see the output of this repository lookup the Github site:
+# What is MuTube?
 
-This demo [site](https://evgenytsizin.github.io/MuTube/) currently contains 3 musical pieces, it has notes for each of three 
+The project is enspired by YouGlish just for musical notes. 
+
+The idea is that the user can choose/photograph notes from some musical piece played by different performers,
+and watch how different maestros played the selected notes. 
+
+The site curently allows to chose notes - and the site provides youtube links to performing the notes, at times corresponding to the notes.
+
+-----
+# What is currently working?
+
+This demo [site](https://evgenytsizin.github.io/MuTube/site/index.html) currently contains 3 musical pieces, it has notes for each: 
 
 1. F.Liszt Dante Sonata S.161 No.7
 2. Nocturne No. 20 in C Minor
 3. Sonate No. 14 Moonlight 3rd Movement
-
-To enter the last updated list enter the site and click on "Go to Site Index"
 
 # What the site about?
 
@@ -15,6 +23,9 @@ Each of the musical piece has its notes, upon clicking on the notes a window wit
 # How it works? 
 
 A special sync algorithm is used to synchronize the notes and the music.
+
+===========================
+# Technical 
 
 # Batch Flow 
 
