@@ -1,3 +1,21 @@
+# To see the output of this repository lookup the Github site:
+
+This demo [site](https://evgenytsizin.github.io/MuTube/) currently contains 3 musical pieces, it has notes for each of three 
+
+1. F.Liszt Dante Sonata S.161 No.7
+2. Nocturne No. 20 in C Minor
+3. Sonate No. 14 Moonlight 3rd Movement
+
+To enter the last updated list enter the site and click on "Go to Site Index"
+
+# What the site about?
+
+Each of the musical piece has its notes, upon clicking on the notes a window with several piano performers is linked to youtube at the specific time. 
+
+# How it works? 
+
+A special sync algorithm is used to synchronize the notes and the music.
+
 # Batch Flow 
 
 1. Batch flow starts from list of html pages with youtube embeds per query. 
