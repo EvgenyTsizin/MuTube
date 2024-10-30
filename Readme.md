@@ -2,8 +2,8 @@
 
 The project is enspired by [YouGlish](https://youglish.com/) just for musical notes (currently focused on piano). 
 
-The idea is that the user can choose/photograph notes from some musical piece played by different performers,
-and watch how different maestros played the selected notes. 
+The user chooses/photographs notes from some musical piece played by different performers,
+and watch how different people (from beginners to maestros) played the selected notes. 
 
 The site curently allows to chose notes - and the site provides youtube links to performing the notes, at times corresponding to the notes.
 
