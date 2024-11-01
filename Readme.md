@@ -24,10 +24,12 @@ Each of the musical piece has its notes, upon clicking on the notes a window wit
 
 A special sync algorithm is used to synchronize the notes and the music.
 
-===========================
+-----------------------------
 # Technical 
 
 # Batch Flow 
+
+## Stage0: download youtubes & mxls. 
 
 1. Batch flow starts from list of html pages with youtube embeds per query. 
 
@@ -80,7 +82,33 @@ run
 ```python Tools/youtube_download_extract.py -i <youtube_with_notes.json>```
 
 This script will download youtubes into the same folder as the input json 
+-----------------------------
+## Stage1: Sync youtube with mxl. 
 
+1. Generate mp3s from the mxls. 
+
+run
+```Tools/mxls_to_mp3.py -i <folder>```
+
+it will scan all subfolders and will convert all mxls in the subdirectories to mp3 using musescore. 
+
+2. Convert all mp3 extracted from youtube and generated to wav inside the subfolder <composition>: 
+run 
+```python Tools/mp3_to_wav.py -i <folder>```
+
+3. Now we need to sync all audio files timing.
+
+run
+```
+cd synctoolbox
+python sync_all_pieces.py -d <Pieces\youtubes>
+```
+This will create *audio_sync.json* in each youtube subfolder of each composition. 
+Notice: you need to pass the youtube folder with all pieces. 
+
+## Stage2: Extract images + timing from mxl. 
+
+-----------------------------
 
 # Old Flow 
 
@@ -104,7 +132,7 @@ run:
 *<composition>.mxl* Downloaded from musescore 
 
 run:
-```python synctoolbox/mxl_to_mp3.py -i <composition>.mxl```
+```python mxl_to_mp3.py -i <composition>.mxl```
 
 *output* - will save .mp3 replacing mxl 
 
@@ -170,3 +198,5 @@ This file unifies all data to generate youtube timings per image
 - download the Detects folder 
 - run detects_to_json.py to generate json for hand detections
 - run site/sort_by_hands.py
+
+This file unifies all data to generate youtube timings per image
