@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API Example with JSON</title>
+</head>
+<body>
+    <h1>Fetch API Example with JSON</h1>
+    <div id="content"></div>
+
+    <script>
+        fetch("images.json")
+            .then((res) => res.json())
+            .then((data) => {
+                const contentDiv = document.getElementById('content');
+                data.images.forEach(image => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = image.url;
+                    imgElement.alt = image.description;
+                    contentDiv.appendChild(imgElement);
+                });
+            })
+            .catch((e) => console.error(e));
+    </script>
+</body>
+</html>
