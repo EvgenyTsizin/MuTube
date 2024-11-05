@@ -44,10 +44,17 @@
             const timingsPath = `timings/${name}/image_links_hands_sorted.json`;
             const youtubeToNamePath = `timings/${name}/youtube_to_name.json`;
 
+            // Debug print for image path
+            console.log(`Reading image from: ${imagePath}`);
+
             // Display the image
             const imgElement = document.getElementById('image');
             imgElement.src = imagePath;
             imgElement.alt = image;
+
+            // Debug print for JSON paths
+            console.log(`Reading video data from: ${timingsPath}`);
+            console.log(`Reading YouTube to name mapping from: ${youtubeToNamePath}`);
 
             // Fetch the JSON data
             fetch(timingsPath)
@@ -65,6 +72,9 @@
                                 const { youtube_link, timing } = video;
                                 const videoId = youtube_link.split('v=')[1];
                                 const videoName = names[youtube_link] || youtube_link;
+
+                                // Debug print for timing and YouTube link
+                                console.log(`YouTube Link: ${youtube_link}, Timing: ${timing}`);
 
                                 const videoTitle = document.createElement('div');
                                 videoTitle.className = 'video-title';

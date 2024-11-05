@@ -4,10 +4,16 @@ import argparse
 import yt_dlp
 import subprocess
 import json
+import shutil 
+import unicodedata
 
 def sanitize_folder_name(name):
-    """Sanitize folder names by removing or replacing invalid characters."""
+    """Sanitize folder names by removing or replacing invalid characters and non-ASCII characters."""
+    # Normalize the name to decompose characters like é into base characters
+    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('ascii')
+    # Remove invalid characters for folder names
     return re.sub(r'[<>:"/\\|?*()\'"]', '', name)
+    
 def get_unique_folder_name(base_folder, folder_name):
     """Generate a unique folder name by adding a suffix if the folder already exists."""
     original_folder_name = folder_name
@@ -28,7 +34,7 @@ def download_youtube_video(url, output_folder, cookies_file):
     video_output_folder = get_unique_folder_name(output_folder, video_title_sanitized)
     video_output_path = os.path.join(output_folder, video_output_folder)
     
-    os.makedirs(video_output_path)  # Create the folder
+    os.makedirs(video_output_path, exist_ok = True)  # Create the folder
     
     video_opts = {
         'format': 'bestvideo[ext=mp4]',
@@ -75,21 +81,25 @@ def process_json(json_file, cookies_file):
 
     base_folder = os.path.dirname(json_file)
     output_folder = os.path.join(base_folder, 'youtubes')
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
+    os.makedirs(output_folder, exist_ok = True)
+    
     processed_data = {}
 
     for item in data:
-        mxl_file = item[0]
+        mxl_file = item[0] + ".mxl"
         search_term = sanitize_folder_name(item[1])
         youtube_suffixes = item[2]
         
         mxl_file_path = os.path.join(base_folder, mxl_file)
         search_output_folder = os.path.join(output_folder, search_term)
         
-        if not os.path.exists(search_output_folder):
-            os.makedirs(search_output_folder)
+        # Move the .mxl file to the YouTube folder
+        new_mxl_path = os.path.join(search_output_folder, os.path.basename(mxl_file))
+        
+        shutil.move(mxl_file_path, new_mxl_path)  # Move the mxl file
+        print(f"file moved {mxl_file_path} to {new_mxl_path}")
+        
+        os.makedirs(search_output_folder, exist_ok=True)  
         
         for suffix in youtube_suffixes:
             url = f"https://www.youtube.com/watch?v={suffix}"
@@ -103,7 +113,7 @@ def process_json(json_file, cookies_file):
             except Exception as e:
                 print(f"Failed to process URL: {url}")
                 print(e)
-
+    
     json_output_path = os.path.join(base_folder, 'youtube_to_name.json')
     with open(json_output_path, 'w', encoding='utf-8') as json_file:
         json.dump(processed_data, json_file, indent=4, ensure_ascii=False)

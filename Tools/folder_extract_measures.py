@@ -3,6 +3,7 @@ import json
 import argparse
 import numpy as np
 from PIL import Image
+import re 
 
 def crop_white_edges(image_data):
     white_threshold = 250
@@ -18,7 +19,7 @@ def crop_white_edges(image_data):
         return image_data[first_non_white_row:last_non_white_row + 1, :]
     return image_data
 
-def find_islands(image_path, black_threshold=150, min_length=220, skip_pixels=4):
+def find_islands(image_path, black_threshold=150, min_length=220, skip_pixels=7):
     factor = 5
     min_length /= factor
     min_length -= 2
@@ -56,6 +57,8 @@ def find_islands(image_path, black_threshold=150, min_length=220, skip_pixels=4)
                         if abs(cur_center - first_center) < 0.003 * h:
                             is_valid = True
                     
+                    print(col, current_count)
+                    
                     if is_valid:
                         island_columns.add(factor * col)
                         col += skip_pixels
@@ -85,11 +88,11 @@ def ocr_measures(json_file_path):
     return result_dict
 
 def report_measures(directory_path):
-    json_file_path = os.path.join(directory_path, 'ocr_results.json')
+    json_file_path = os.path.join(directory_path, 'output/ocr_results.json')
     ocr_dict = ocr_measures(json_file_path)
     results = {}
-    images_directory = os.path.join(directory_path, "images")
-    cropped_images_directory = os.path.join(directory_path, "cropped_images")
+    images_directory = os.path.join(directory_path, "output/__images__")
+    cropped_images_directory = os.path.join(directory_path, "output/cropped_images")
 
     if not os.path.exists(cropped_images_directory):
         os.makedirs(cropped_images_directory)
@@ -97,8 +100,14 @@ def report_measures(directory_path):
     measure_idx = 1
 
     print("Starting processing images...")
-    
-    for filename in os.listdir(images_directory):
+
+    # Helper function to extract the numeric part of the filename
+    def extract_number(filename):
+        match = re.search(r'(\d+)', filename)
+        return int(match.group(1)) if match else float('inf')
+
+    # Sort filenames by the numeric part
+    for filename in sorted(os.listdir(images_directory), key=extract_number):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             print(f"Processing {filename}..., measure_idx = {measure_idx}")
             image_path = os.path.join(images_directory, filename)
@@ -119,18 +128,32 @@ def report_measures(directory_path):
             cropped_image = Image.fromarray(cropped_image_data)
             cropped_image.save(os.path.join(cropped_images_directory, filename))
 
-    with open(os.path.join(directory_path, 'island_locations.json'), 'w') as f:
+    with open(os.path.join(directory_path, 'output/island_locations.json'), 'w') as f:
         json.dump(results, f, indent=4)
 
     print("Processing completed successfully.")
-
+    
 def main():
     parser = argparse.ArgumentParser(description='Process images to extract measures and islands.')
     parser.add_argument('-i', '--input', required=True, help='Path to the input directory containing images and OCR results.')
     args = parser.parse_args()
 
     input_dir = args.input
-    report_measures(input_dir)
+
+    # List all subdirectories in the input directory
+    for item in os.listdir(input_dir):
+
+        item_path = os.path.join(input_dir, item)
+        item_path_output = os.path.join(input_dir, item, "output")
+
+        # Check if it's a directory and contains the necessary files
+        if os.path.isdir(item_path_output):
+            subfolder_items = os.listdir(item_path_output)
+		
+            if 'ocr_results.json' in subfolder_items and '__images__' in subfolder_items:
+                print(f"Processing directory: {item_path}")
+                report_measures(item_path)
 
 if __name__ == '__main__':
     main()
+

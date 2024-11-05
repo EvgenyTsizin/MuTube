@@ -5,14 +5,11 @@ from music21 import converter, tempo, meter, environment
 import zipfile
 import re
 import numpy as np
-import shutil 
+import shutil
 
 env = environment.Environment()
-env['musicxmlPath'] = r'C:\Program Files\MuseScore 3\bin\MuseScore3.exe'  
-env['musescoreDirectPNGPath'] = r'C:\Program Files\MuseScore 3\bin\MuseScore3.exe'  
 
 def remove_tempo_information(input_file, output_file):
-    
     print("remove_tempo_information", input_file, output_file)
     temp_dir = "temp_musicxml"
     if not os.path.exists(temp_dir):
@@ -47,15 +44,18 @@ def remove_tempo_information(input_file, output_file):
         file.write(modified_xml_content)
     
     shutil.rmtree(temp_dir) 
-    
+
 def convert_mxl_to_mp3(mxl_path):
 
     modified_xml_file = mxl_path[:-4] + '_modified.musicxml'
-    remove_tempo_information(mxl_path, modified_xml_file)
-
+    
     # Define the output path by replacing the .mxl extension with .mp3
     mp3_path = mxl_path[:-4] + '.mp3'
 
+    if os.path.exists(mp3_path):
+        return 
+        
+    remove_tempo_information(mxl_path, modified_xml_file)    
     # Construct the MuseScore command to convert the file
     command = [env['musicxmlPath'], modified_xml_file, '-o', mp3_path, '-R']
     
@@ -68,19 +68,21 @@ def convert_mxl_to_mp3(mxl_path):
     else:
         print(f"Conversion completed. MP3 file saved at '{mp3_path}'.")
 
-def main():
-    parser = argparse.ArgumentParser(description="Convert MusicXML (MXL) to MP3 using MuseScore.")
-    parser.add_argument('-i', '--input', required=True, help='Path to the input MXL file.')
-   
-    args = parser.parse_args()
+def process_folder(input_folder, muse_path):
+    env['musicxmlPath'] = muse_path
+    env['musescoreDirectPNGPath'] = muse_path
 
-    # Load the score to determine the time signature
-    score = converter.parse(args.input)
-    time_signature = score.getTimeSignatures()[0]
-    beats_per_measure = time_signature.numerator
-    
-    # Convert the MXL file to MP3 with the calculated tempo
-    convert_mxl_to_mp3(args.input)
+    for root, _, files in os.walk(input_folder):
+        for file in files:
+            if file.endswith(".mxl"):
+                mxl_path = os.path.join(root, file)
+                convert_mxl_to_mp3(mxl_path)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Process MusicXML files in a folder and convert to mp3.')
+    parser.add_argument('-i', '--input', required=True, help='Input folder containing .mxl files')
+    parser.add_argument('-m', '--muse_path', default=r'C:\Program Files\MuseScore 3\bin\MuseScore3.exe', help='Path to MuseScore executable')
+    
+    args = parser.parse_args()
+
+    process_folder(args.input, args.muse_path)

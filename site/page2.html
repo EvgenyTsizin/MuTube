@@ -34,12 +34,17 @@
             height: auto;
             padding: 5px;
             background-color: white;
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            transition: transform 0.3s ease, background-color 0.3s ease, border 0.3s ease;
             cursor: pointer;
         }
         #images img:hover {
             transform: scale(1.05);
             background-color: rgba(0, 0, 0, 0.8);
+        }
+        #images img.selected {
+            border: 3px solid blue; /* Border to indicate selection */
+            transform: scale(1.05); /* Keep the scale effect */
+            background-color: rgba(0, 0, 0, 0.8); /* Keep background effect */
         }
         #iframe-section {
             width: 50%;
@@ -55,7 +60,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const params = new URLSearchParams(window.location.search);
-            const name = params.get('name').replace(/_/g, ' ');
+            const name = params.get('name') ? params.get('name').replace(/_/g, ' ') : 'Images';
             document.getElementById('title').innerText = `Score Sheet for ${name}`;
 
             fetch('images.json')
@@ -67,13 +72,26 @@
                         const img = document.createElement('img');
                         img.src = `images/${params.get('name')}/${image}`;
                         img.alt = `Image ${index + 1}`;
-                        img.onclick = () => {
+                        img.addEventListener('click', () => {
                             document.getElementById('iframe').src = `page3.html?name=${params.get('name')}&image=${image}`;
-                        };
+                            updateSelectedImage(img);
+                        });
                         imageContainer.appendChild(img);
                     });
                 })
                 .catch(error => console.error('Error fetching images:', error));
+
+            function updateSelectedImage(selectedImg) {
+                console.log("Updating selected image...");
+
+                // Remove 'selected' class from all images
+                const allImages = document.querySelectorAll('#images img');
+                allImages.forEach(img => img.classList.remove('selected'));
+
+                // Add 'selected' class to the clicked image
+                selectedImg.classList.add('selected');
+                console.log("Selected image:", selectedImg);
+            }
         });
     </script>
 </head>
@@ -87,3 +105,4 @@
     </div>
 </body>
 </html>
+

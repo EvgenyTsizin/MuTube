@@ -7,7 +7,27 @@ import bisect
 import music21
 
 def get_measure_times(mxl_path):
-    score = music21.converter.parse(mxl_path)
+
+    score = None 
+    
+    try:
+        score = music21.converter.parse(mxl_path)
+    except:
+        # If not found, search for another file ending with .mxl
+        mxl_path = next((os.path.join(os.path.dirname(mxl_path), f) for f in os.listdir(os.path.dirname(mxl_path)) if f.endswith('.mxl')), None)
+
+    if mxl_path is None:
+        return None
+    
+    if score is None:
+        try:
+            score = music21.converter.parse(mxl_path)
+        except:
+            return None 
+    
+    if score is None:
+        return None
+           
     measure_times = {}
     current_time = 0.0  # To track the total time considering repeats
     repeat_start_time = -1 
@@ -18,7 +38,6 @@ def get_measure_times(mxl_path):
         # Update the time for the current measure
         if measure_index not in measure_times:
             measure_times[measure_index] = current_time
-        
         
         # Handle the repeats
         if measure.leftBarline and measure.leftBarline.style == 'heavy-light':
@@ -92,21 +111,20 @@ def find_youtube_time_for_measure(score_index, score_data, scale_factor, youtube
         interpolated_time = lower_value + proportion * (higher_value - lower_value)
         return interpolated_time
 
-def create_score_to_youtube_mappings(input_folder, output_folder):
-    composition_name = os.path.basename(os.path.normpath(input_folder))
+def create_score_to_youtube_mappings(composition_folder, output_folder, youtube_to_names_path):
+    composition_name = os.path.basename(composition_folder)
     
     score_json_path = os.path.join(output_folder, 'timings', composition_name, 'measure_times.json')
-    youtube_dir = os.path.join(input_folder, 'youtube_videos')
-    
     score_data = load_json_file(score_json_path)
     
     output_directory = os.path.join(output_folder, "timings", composition_name, "youtube_score_mappings")
     os.makedirs(output_directory, exist_ok=True)
     
+    youtube_to_names = load_json_file(youtube_to_names_path)
     first_audio_sync = None
-    for subdir in os.listdir(youtube_dir):
-        subdir_path = os.path.join(youtube_dir, subdir)
-        if os.path.isdir(subdir_path):
+    for youtube_id in youtube_to_names.values():
+        subdir_path = os.path.join(composition_folder, youtube_id)
+        if os.path.isdir(subdir_path) and youtube_id != 'output':
             json_file_path = os.path.join(subdir_path, 'audio_sync.json')
             if os.path.exists(json_file_path):
                 first_audio_sync = load_json_file(json_file_path)
@@ -117,9 +135,9 @@ def create_score_to_youtube_mappings(input_folder, output_folder):
 
     scale_factor = get_score_scale(score_data, first_audio_sync)
     print("scale_factor", scale_factor)
-    for subdir in os.listdir(youtube_dir):
-        subdir_path = os.path.join(youtube_dir, subdir)
-        if os.path.isdir(subdir_path):
+    for youtube_id in youtube_to_names.values():
+        subdir_path = os.path.join(composition_folder, youtube_id)
+        if os.path.isdir(subdir_path) and youtube_id != 'output':
             json_file_path = os.path.join(subdir_path, 'audio_sync.json')
             if os.path.exists(json_file_path):
                 youtube_data = load_json_file(json_file_path)
@@ -129,7 +147,7 @@ def create_score_to_youtube_mappings(input_folder, output_folder):
                     youtube_time = find_youtube_time_for_measure(idx, score_data, scale_factor, youtube_data)
                     score_to_youtube[int(idx)] = youtube_time
                 
-                output_file_path = os.path.join(output_directory, f'{subdir}.json')
+                output_file_path = os.path.join(output_directory, f'{youtube_id}.json')
                 save_to_json(score_to_youtube, output_file_path)
 
     print(f"Mappings created in folder: {output_directory}")
@@ -151,51 +169,61 @@ def update_images_json(output_folder, composition_name, images_list):
     save_to_json(images_data, images_json_path)
 
 def copy_and_rename_folder(input_folder, output_folder="site"):
-    composition_name = os.path.basename(os.path.normpath(input_folder))
-    cropped_images_src = os.path.join(input_folder, "cropped_images")
-    cropped_images_dst = os.path.join(output_folder, "images", composition_name)
-    island_locations_src = os.path.join(input_folder, "island_locations.json")
-    island_locations_dst = os.path.join(output_folder, "images_metadata", f"{composition_name}.json")
-    mxl_src = os.path.join(input_folder, "modified.musicxml")
-    timing_dst = os.path.join(output_folder, "timings", composition_name, "measure_times.json")
+    youtube_to_names_path = os.path.join(input_folder, "..", 'youtube_to_name.json')
+    if not os.path.exists(youtube_to_names_path):
+        raise FileNotFoundError(f"youtube_to_name.json not found in input folder: {input_folder}")
 
-    youtub_to_names_src = os.path.join(input_folder, "youtube_to_name.json")
-    youtub_to_name_dst = os.path.join(output_folder, "timings", composition_name, "youtube_to_name.json")
+    for composition_name in os.listdir(input_folder):
+        composition_folder = os.path.join(input_folder, composition_name)
+        if not os.path.isdir(composition_folder):
+            continue
 
-    os.makedirs(cropped_images_dst, exist_ok=True)
-    os.makedirs(os.path.dirname(island_locations_dst), exist_ok=True)
-    os.makedirs(os.path.dirname(timing_dst), exist_ok=True)
-    
-    images_list = []
-    for root, dirs, files in os.walk(cropped_images_src):
-        for file in files:
-            src_file = os.path.join(root, file)
-            dst_file = os.path.join(cropped_images_dst, os.path.relpath(src_file, cropped_images_src))
+        cropped_images_src = os.path.join(composition_folder, "output", "cropped_images")
+        cropped_images_dst = os.path.join(output_folder, "images", composition_name)
+        island_locations_src = os.path.join(composition_folder, "output", "island_locations.json")
+        island_locations_dst = os.path.join(output_folder, "images_metadata", f"{composition_name}.json")
+        mxl_src = next((os.path.join(composition_folder, f) for f in os.listdir(composition_folder) if f.endswith('modified.musicxml')), None)
+        timing_dst = os.path.join(output_folder, "timings", composition_name, "measure_times.json")
+        youtube_to_name_dst = os.path.join(output_folder, "timings", composition_name, "youtube_to_name.json")
+	
+        measure_times = get_measure_times(mxl_src)
+	
+        if measure_times is None:
+            continue 
+            
+        os.makedirs(cropped_images_dst, exist_ok=True)
+        os.makedirs(os.path.dirname(island_locations_dst), exist_ok=True)
+        os.makedirs(os.path.dirname(timing_dst), exist_ok=True)
+        
+        images_list = []
+        for file in os.listdir(cropped_images_src):
+            src_file = os.path.join(cropped_images_src, file)
+            dst_file = os.path.join(cropped_images_dst, file)
             shutil.copy2(src_file, dst_file)
             images_list.append(file)
-    print(f"Copied {cropped_images_src} to {cropped_images_dst}")
+        print(f"Copied images from {cropped_images_src} to {cropped_images_dst}")
 
-    shutil.copy2(island_locations_src, island_locations_dst)
-    print(f"Copied {island_locations_src} to {island_locations_dst}")
+        shutil.copy2(island_locations_src, island_locations_dst)
+        print(f"Copied {island_locations_src} to {island_locations_dst}")
 
-    shutil.copy2(youtub_to_names_src, youtub_to_name_dst)
-    print(f"Copied {youtub_to_names_src} to {youtub_to_name_dst}")
+        shutil.copy2(youtube_to_names_path, youtube_to_name_dst)
+        print(f"Copied {youtube_to_names_path} to {youtube_to_name_dst}")
 
-    measure_times = get_measure_times(mxl_src)
-    save_to_json(measure_times, timing_dst)
-    print(f"Saved measure times to {timing_dst}")
+        save_to_json(measure_times, timing_dst)
+        print(f"Saved measure times to {timing_dst}")
 
-    create_score_to_youtube_mappings(input_folder, output_folder)
+        create_score_to_youtube_mappings(composition_folder, output_folder, youtube_to_names_path)
 
-    update_images_json(output_folder, composition_name, images_list)
-    print(f"Updated images.json with images from {composition_name}")
+        update_images_json(output_folder, composition_name, images_list)
+        print(f"Updated images.json with images from {composition_name}")
 
     print("Copy and rename operations completed successfully.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copy and rename folders and files.")
-    parser.add_argument('-i', '--input', required=True, help="Input folder (e.g., synctoolbox/<composition_name>)")
+    parser.add_argument('-i', '--input', required=True, help="Input folder (e.g., Pieces/youtubes")
     parser.add_argument('-o', '--output', default="site", help="Output folder (default is 'site')")
     
     args = parser.parse_args()
     copy_and_rename_folder(args.input, args.output)
+
