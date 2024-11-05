@@ -7,8 +7,6 @@ __pycache__/
 *.so
 
 # onnx files 
-*.jpg
-*.png
 *.onnx
 *.prototxt
 *.pyc 
