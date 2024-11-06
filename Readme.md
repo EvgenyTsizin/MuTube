@@ -80,20 +80,46 @@ run
 
 The script will generate *youtube_with_notes.json* this file will have all the data for the next step.
 
+Note: The format of youtube_with_notes.json
+```
+[
+  [
+    "Sonate_No._14_Moonlight_1st_Movement",
+    "Sonate No. 14 Moonlight 1st Movement",
+    [
+      "Pu3hGQCra18",
+      "Lu3hGQKka19"
+    ]
+  ],
+  [
+    "WA_Mozart_Marche_Turque_Turkish_March_fingered",
+    "WA Mozart Marche Turque Turkish March fingered",
+    [
+      "hfoHsQ2Jptk"
+    ]
+  ]
+]
+```
+
 6. Download all data needed from youtubes.
+
+Note: You need to place mxls into the same folder as youtube_with_notes.json
+
 
 run
 ```python Tools/youtube_download_extract.py -i <youtube_with_notes.json>
 ```
 
-This script will download youtubes into the same folder as the input json 
+This script will download youtubes into the same folder as the input json. 
+It will create directories by purified title of the piece (search term) and copy mxl there. 
+
 -----------------------------
 ## Stage1: Sync youtube with mxl. 
 
 1. Generate mp3s from the mxls. 
 
 run
-```Tools/mxls_to_mp3.py -i <folder>
+```python Tools/mxls_to_mp3.py -i <folder> -m <musescore_path>
 ```
 
 it will scan all subfolders and will convert all mxls in the subdirectories to mp3 using musescore. 
