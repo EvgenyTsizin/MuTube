@@ -68,9 +68,7 @@ def convert_mxl_to_mp3(mxl_path):
     else:
         print(f"Conversion completed. MP3 file saved at '{mp3_path}'.")
 
-def process_folder(input_folder, muse_path):
-    env['musicxmlPath'] = muse_path
-    env['musescoreDirectPNGPath'] = muse_path
+def process_folder(input_folder):
 
     for root, _, files in os.walk(input_folder):
         for file in files:
@@ -84,5 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--muse_path', default=r'C:\Program Files\MuseScore 3\bin\MuseScore3.exe', help='Path to MuseScore executable')
     
     args = parser.parse_args()
+    env['musicxmlPath'] = args.muse_path
+    env['musescoreDirectPNGPath'] = args.muse_path
 
-    process_folder(args.input, args.muse_path)
+    process_folder(args.input)

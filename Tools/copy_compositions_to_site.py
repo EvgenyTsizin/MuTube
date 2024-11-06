@@ -180,6 +180,10 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
 
         cropped_images_src = os.path.join(composition_folder, "output", "cropped_images")
         cropped_images_dst = os.path.join(output_folder, "images", composition_name)
+        
+        #if os.path.isdir(cropped_images_dst):
+        #    continue
+            
         island_locations_src = os.path.join(composition_folder, "output", "island_locations.json")
         island_locations_dst = os.path.join(output_folder, "images_metadata", f"{composition_name}.json")
         mxl_src = next((os.path.join(composition_folder, f) for f in os.listdir(composition_folder) if f.endswith('modified.musicxml')), None)
@@ -211,8 +215,13 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
 
         save_to_json(measure_times, timing_dst)
         print(f"Saved measure times to {timing_dst}")
+        
+        try:
+            create_score_to_youtube_mappings(composition_folder, output_folder, youtube_to_names_path)
+        except Exception as e:
+            print(f"Error in create_score_to_youtube_mappings for {composition_folder}: {e}")
+            continue  # Skip to the next composition if there's an error
 
-        create_score_to_youtube_mappings(composition_folder, output_folder, youtube_to_names_path)
 
         update_images_json(output_folder, composition_name, images_list)
         print(f"Updated images.json with images from {composition_name}")

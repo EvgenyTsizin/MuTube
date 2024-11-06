@@ -93,6 +93,8 @@ def process_json(json_file, cookies_file):
         mxl_file_path = os.path.join(base_folder, mxl_file)
         search_output_folder = os.path.join(output_folder, search_term)
         
+        os.makedirs(search_output_folder, exist_ok = True)
+    
         # Move the .mxl file to the YouTube folder
         new_mxl_path = os.path.join(search_output_folder, os.path.basename(mxl_file))
         

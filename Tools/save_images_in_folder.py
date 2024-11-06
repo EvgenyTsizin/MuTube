@@ -8,8 +8,6 @@ import shutil
 
 # Set the MuseScore paths
 env = environment.Environment()
-env['musicxmlPath'] = '/media/simsim314/DATA/Downloads/MuseScore-Studio-4.4.3.242971445-x86_64.AppImage'
-env['musescoreDirectPNGPath'] = '/media/simsim314/DATA/Downloads/MuseScore-Studio-4.4.3.242971445-x86_64.AppImage'
 
 def remove_tempo_information(input_file, output_file, use_zip):
     print("Removing tempo information from:", input_file)
@@ -91,6 +89,12 @@ def process_folder(folder_path):
 def main():
     parser = argparse.ArgumentParser(description='Process all MXL files in a folder and its subfolders to remove tempo and extract images.')
     parser.add_argument('-i', '--input', required=True, help='Path to the folder containing MXL files.')
+    parser.add_argument('-m', '--muse_path', default=r'C:\Program Files\MuseScore 3\bin\MuseScore3.exe', help='Path to MuseScore executable')
+    
+    args = parser.parse_args()
+    env['musicxmlPath'] = args.muse_path
+    env['musescoreDirectPNGPath'] = args.muse_path
+
     args = parser.parse_args()
 
     folder_path = args.input
