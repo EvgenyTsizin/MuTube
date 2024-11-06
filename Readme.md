@@ -38,7 +38,8 @@ You will also need youtube api key
 
 run: 
 
-```Tools/music_piece_searcher.py -f <search file> -k <youtube_api_key>
+```
+Tools/music_piece_searcher.py -f <search file> -k <youtube_api_key>
 ```
 
 *search file* - this is the file with search terms, each line is a search
@@ -73,7 +74,8 @@ The expected *youtubes.json* file will contain a list of tuples:
 place the *youtubes.json* and all *name.mxl* files into same folder.  
 
 run
-```python Tools/attach_musicfile_to_name.py <folder>
+```
+python Tools/attach_musicfile_to_name.py <folder>
 ```
 
 *folder* - pass the folder with all the mentioned data. 
@@ -107,7 +109,8 @@ Note: You need to place mxls into the same folder as youtube_with_notes.json
 
 
 run
-```python Tools/youtube_download_extract.py -i <youtube_with_notes.json>
+```
+python Tools/youtube_download_extract.py -i <youtube_with_notes.json>
 ```
 
 This script will download youtubes into the same folder as the input json. 
@@ -119,14 +122,16 @@ It will create directories by purified title of the piece (search term) and copy
 1. Generate mp3s from the mxls. 
 
 run
-```python Tools/mxls_to_mp3.py -i <folder> -m <musescore_path>
+```
+python Tools/mxls_to_mp3.py -i <folder> -m <musescore_path>
 ```
 
 it will scan all subfolders and will convert all mxls in the subdirectories to mp3 using musescore. 
 
 2. Convert all mp3 extracted from youtube and generated to wav inside the subfolder <composition>: 
 run 
-```python Tools/mp3_to_wav.py -i <folder>
+```
+python Tools/mp3_to_wav.py -i <folder>
 ```
 
 3. Now we need to sync all audio files timing.
@@ -205,7 +210,8 @@ This will generate *image_links.json* if not exist. If you want to modify image_
 1. Extract youtube videos to mp3 and frames 
 
 run:
-```python synctoolbox/youtube_extract.py -i <file_with_links.txt>
+```
+python synctoolbox/youtube_extract.py -i <file_with_links.txt>
 ```
 
 *output_folder* - a subfolder where the *file_with_links.txt* is located
@@ -216,20 +222,23 @@ run:
 *<composition>.mxl* Downloaded from musescore 
 
 run:
-```python mxl_to_mp3.py -i <composition>.mxl
+```
+python mxl_to_mp3.py -i <composition>.mxl
 ```
 
 *output* - will save .mp3 replacing mxl 
 
 3. Convert all mp3 extracted from youtube to wav inside the subfolder <composition>: 
 run 
-```python synctoolbox/mp3_to_wav.py -i <composition>
+```
+python synctoolbox/mp3_to_wav.py -i <composition>
 ```
 
 4. Sync <composition>.wav with wav files from youtube videos
 
 run 
-```python synctoolbox/sync_dir_wav.py -r <composition>.wav -d <youtube folder>
+```
+python synctoolbox/sync_dir_wav.py -r <composition>.wav -d <youtube folder>
 ```
 
 *output* - in each folder with wav file added *audio_sync.json*
@@ -239,7 +248,8 @@ run
 1. Remove tempo and generate images
 
 run 
-```python save_images.py -i <composition.mxl>
+```
+python save_images.py -i <composition.mxl>
 ```
 
 this will generate images folder under the <composition.mxl> base folder. 
@@ -249,7 +259,8 @@ this will generate images folder under the <composition.mxl> base folder.
 2. ocr 
 
 run 
-```cd ocr
+```
+cd ocr
 python ocr_fodler.py -i <image folder>
 ```
 
@@ -258,7 +269,8 @@ will be saved to <folder where>/ocr_results.json
 3. Extract Measures and Crop images 
 
 run 
-```python extract_measures.py -i <composition folder>
+```
+python extract_measures.py -i <composition folder>
 ```
 
 the utility assumes 
