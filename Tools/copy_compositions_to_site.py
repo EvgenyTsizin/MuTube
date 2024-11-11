@@ -7,9 +7,7 @@ import bisect
 import music21
 
 def get_measure_times(mxl_path):
-
-    score = None 
-    
+    score = None
     try:
         score = music21.converter.parse(mxl_path)
     except:
@@ -18,29 +16,31 @@ def get_measure_times(mxl_path):
 
     if mxl_path is None:
         return None
-    
+
     if score is None:
         try:
             score = music21.converter.parse(mxl_path)
         except:
-            return None 
-    
+            return None
+
     if score is None:
         return None
-           
+
     measure_times = {}
     current_time = 0.0  # To track the total time considering repeats
-    repeat_start_time = -1 
-    
+    repeat_start_time = -1
+
     for measure in score.parts[0].getElementsByClass('Measure'):
         measure_index = measure.measureNumber
-        
+
         # Update the time for the current measure
         if measure_index not in measure_times:
             measure_times[measure_index] = current_time
-        
+
         # Handle the repeats
-        if measure.leftBarline and measure.leftBarline.style == 'heavy-light':
+        if measure.leftBarline and (
+                getattr(measure.leftBarline, 'style', None) == 'heavy-light' or getattr(measure.leftBarline, 'type', None) == 'heavy-light'):
+
             # Repeat start - mark the time for the first repeat
             repeat_start_time = current_time
             print("repeat start time", repeat_start_time)
@@ -48,18 +48,19 @@ def get_measure_times(mxl_path):
         # Increment the time by the duration of the current measure
         current_time += measure.duration.quarterLength
 
-        if measure.rightBarline and measure.rightBarline.style == 'final':
-            if repeat_start_time > 0:
+        if measure.rightBarline and (
+                getattr(measure.rightBarline, 'style', None) == 'final' or getattr(measure.rightBarline, 'type', None) == 'final'):
+
+            if repeat_start_time >= 0:
                 # Repeat end - add the duration of the repeated section
                 repeat_duration = current_time - repeat_start_time
-                
+
                 print("repeat duration", repeat_duration)
                 current_time += repeat_duration
-                repeat_start_time = -1 
-                
+                repeat_start_time = -1
+
     print("Successfully extracted", len(measure_times), "measures")
     return measure_times
-
 
 def save_to_json(data, output_file):
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -73,14 +74,14 @@ def get_score_scale(score_data, first_audio_sync):
     scale_factor = json_last_timing / score_last_timing
     if abs(scale_factor - 1) < 0.05:
         scale_factor = 1
-    
+
     if abs(scale_factor - 0.5) < 0.05:
         scale_factor = 0.5
 
     return scale_factor
 
 def find_youtube_time_for_measure(score_index, score_data, scale_factor, youtube_timings):
-    score_time = score_data.get(str(score_index))
+    score_time = score_data.get(score_index)
 
     if score_time is None:
         raise ValueError(f"Score index {score_index} not found in the score JSON data")
@@ -189,9 +190,9 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
         mxl_src = next((os.path.join(composition_folder, f) for f in os.listdir(composition_folder) if f.endswith('modified.musicxml')), None)
         timing_dst = os.path.join(output_folder, "timings", composition_name, "measure_times.json")
         youtube_to_name_dst = os.path.join(output_folder, "timings", composition_name, "youtube_to_name.json")
-	
+    
         measure_times = get_measure_times(mxl_src)
-	
+    
         if measure_times is None:
             continue 
             
@@ -222,7 +223,6 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
             print(f"Error in create_score_to_youtube_mappings for {composition_folder}: {e}")
             continue  # Skip to the next composition if there's an error
 
-
         update_images_json(output_folder, composition_name, images_list)
         print(f"Updated images.json with images from {composition_name}")
 
@@ -235,4 +235,3 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     copy_and_rename_folder(args.input, args.output)
-
