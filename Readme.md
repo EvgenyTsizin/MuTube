@@ -140,6 +140,7 @@ run
 ```
 cd synctoolbox
 python sync_all_pieces.py -d <Pieces\youtubes>
+cd ..
 ```
 This will create *audio_sync.json* in each youtube subfolder of each composition. 
 Notice: you need to pass the youtube folder with all pieces. 
@@ -160,6 +161,7 @@ run
 ```
 cd ocr 
 python ocr_all_subfodlers.py -i ../Pieces/youtubes
+cd ..
 ```
 
 This will create /output/ocr_results.json in each <composition> subfolder 
@@ -302,3 +304,4 @@ This file unifies all data to generate youtube timings per image
 - run site/sort_by_hands.py
 
 This file unifies all data to generate youtube timings per image
+

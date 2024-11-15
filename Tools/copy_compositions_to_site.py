@@ -6,13 +6,21 @@ import music21
 import bisect
 import music21
 
+def sanitize_folder_name(name):
+    """Sanitize folder names by removing or replacing invalid characters and non-ASCII characters."""
+    # Normalize the name to decompose characters like é into base characters
+    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('ascii')
+    # Remove invalid characters for folder names
+    return re.sub(r'[<>:"/\\|?*()\'"]', '', name)
+    
 def get_measure_times(mxl_path):
     score = None
     try:
         score = music21.converter.parse(mxl_path)
     except:
         # If not found, search for another file ending with .mxl
-        mxl_path = next((os.path.join(os.path.dirname(mxl_path), f) for f in os.listdir(os.path.dirname(mxl_path)) if f.endswith('.mxl')), None)
+        mxl_path = next((os.path.join(os.path.dirname(mxl_path), f) for f in os.listdir(os.path.dirname(mxl_path)) if
+                         f.endswith('.mxl')), None)
 
     if mxl_path is None:
         return None
@@ -28,18 +36,26 @@ def get_measure_times(mxl_path):
 
     measure_times = {}
     current_time = 0.0  # To track the total time considering repeats
-    repeat_start_time = -1
+    repeat_start_time = 0
+
+    measure_index = -1
+
+    for _ in score.parts[0].getElementsByClass('Measure'):
+        measure_index += 1
+
+    last_measure = measure_index
+
+    measure_index = -1
 
     for measure in score.parts[0].getElementsByClass('Measure'):
-        measure_index = measure.measureNumber
+        measure_index += 1
 
-        # Update the time for the current measure
-        if measure_index not in measure_times:
-            measure_times[measure_index] = current_time
+        measure_times[measure_index + 1] = current_time
 
         # Handle the repeats
         if measure.leftBarline and (
-                getattr(measure.leftBarline, 'style', None) == 'heavy-light' or getattr(measure.leftBarline, 'type', None) == 'heavy-light'):
+                    getattr(measure.leftBarline, 'style', None) == 'heavy-light' or getattr(measure.leftBarline, 'type',
+                                                                                            None) == 'heavy-light'):
 
             # Repeat start - mark the time for the first repeat
             repeat_start_time = current_time
@@ -49,9 +65,10 @@ def get_measure_times(mxl_path):
         current_time += measure.duration.quarterLength
 
         if measure.rightBarline and (
-                getattr(measure.rightBarline, 'style', None) == 'final' or getattr(measure.rightBarline, 'type', None) == 'final'):
+                getattr(measure.rightBarline, 'style', None) == 'final' or getattr(measure.rightBarline, 'type',
+                                                                                   None) == 'final'):
 
-            if repeat_start_time >= 0:
+            if (repeat_start_time >= 0 and measure_index != last_measure) or repeat_start_time > 0:
                 # Repeat end - add the duration of the repeated section
                 repeat_duration = current_time - repeat_start_time
 
@@ -60,18 +77,18 @@ def get_measure_times(mxl_path):
                 repeat_start_time = -1
 
     print("Successfully extracted", len(measure_times), "measures")
-    return measure_times
-
+    return measure_times, current_time
+    
 def save_to_json(data, output_file):
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=4)
 
-def get_score_scale(score_data, first_audio_sync):
+def get_score_scale(total_time, first_audio_sync):
     json_last_timing = float(list(first_audio_sync.keys())[-1])
-    score_last_timing = float(list(score_data.values())[-1])
 
-    scale_factor = json_last_timing / score_last_timing
+    scale_factor = json_last_timing / total_time
+
     if abs(scale_factor - 1) < 0.05:
         scale_factor = 1
 
@@ -111,48 +128,73 @@ def find_youtube_time_for_measure(score_index, score_data, scale_factor, youtube
         proportion = (scaled_time - lower_timing) / (higher_timing - lower_timing)
         interpolated_time = lower_value + proportion * (higher_value - lower_value)
         return interpolated_time
-
+        
 def create_score_to_youtube_mappings(composition_folder, output_folder, youtube_to_names_path):
     composition_name = os.path.basename(composition_folder)
     
     score_json_path = os.path.join(output_folder, 'timings', composition_name, 'measure_times.json')
-    score_data = load_json_file(score_json_path)
+    score_data, total_time = load_json_file(score_json_path)
     
     output_directory = os.path.join(output_folder, "timings", composition_name, "youtube_score_mappings")
     os.makedirs(output_directory, exist_ok=True)
     
     youtube_to_names = load_json_file(youtube_to_names_path)
     first_audio_sync = None
-    for youtube_id in youtube_to_names.values():
-        subdir_path = os.path.join(composition_folder, youtube_id)
-        if os.path.isdir(subdir_path) and youtube_id != 'output':
-            json_file_path = os.path.join(subdir_path, 'audio_sync.json')
+    for subfolder in os.listdir(composition_folder):
+        subfolder_path = os.path.join(composition_folder, subfolder)
+        
+        if os.path.isdir(subfolder_path) and subfolder != 'output':
+            json_file_path = os.path.join(subfolder_path, 'audio_sync.json')
             if os.path.exists(json_file_path):
                 first_audio_sync = load_json_file(json_file_path)
                 break
 
     if not first_audio_sync:
-        raise FileNotFoundError("No audio_sync.json file found in the YouTube directories.")
+        raise FileNotFoundError("No audio_sync.json file found in the subdirectories.")
 
-    scale_factor = get_score_scale(score_data, first_audio_sync)
+    scale_factor = get_score_scale(total_time, first_audio_sync)
+    
     print("scale_factor", scale_factor)
-    for youtube_id in youtube_to_names.values():
-        subdir_path = os.path.join(composition_folder, youtube_id)
-        if os.path.isdir(subdir_path) and youtube_id != 'output':
-            json_file_path = os.path.join(subdir_path, 'audio_sync.json')
+    
+    for subfolder in os.listdir(composition_folder):
+        subfolder_path = os.path.join(composition_folder, subfolder)
+        if os.path.isdir(subfolder_path) and subfolder != 'output':
+            json_file_path = os.path.join(subfolder_path, 'audio_sync.json')
+            
             if os.path.exists(json_file_path):
                 youtube_data = load_json_file(json_file_path)
-
+		
                 score_to_youtube = {}
                 for idx in score_data.keys():
                     youtube_time = find_youtube_time_for_measure(idx, score_data, scale_factor, youtube_data)
                     score_to_youtube[int(idx)] = youtube_time
+
+                # Inserted logic starts here
+                score_youtube_ratio = (scale_factor * (float(score_data['4']) - float(score_data['3']))) / (score_to_youtube[4] - score_to_youtube[3])
+
+                # Backtrack to calculate score_to_youtube[2]
+                score_duration_2_3 = scale_factor * (float(score_data['3']) - float(score_data['2']))
+                youtube_duration_2_3 = score_duration_2_3 / score_youtube_ratio
+                score_to_youtube[2] = score_to_youtube[3] - youtube_duration_2_3
+
+                # Backtrack further to calculate score_to_youtube[1]
+                score_duration_1_2 = scale_factor * (float(score_data['2']) - float(score_data['1']))
+                youtube_duration_1_2 = score_duration_1_2 / score_youtube_ratio
+                score_to_youtube[1] = score_to_youtube[2] - youtube_duration_1_2
                 
-                output_file_path = os.path.join(output_directory, f'{youtube_id}.json')
+                # Check if values are less than 0 and set to 0 if necessary
+                if score_to_youtube[1] < 0:
+                    score_to_youtube[1] = 0
+                if score_to_youtube[2] < 0:
+                    score_to_youtube[2] = 0
+                # Inserted logic ends here
+                
+                
+                output_file_path = os.path.join(output_directory, f'{subfolder}.json')
                 save_to_json(score_to_youtube, output_file_path)
 
     print(f"Mappings created in folder: {output_directory}")
-
+    
 def load_json_file(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
@@ -174,10 +216,26 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
     if not os.path.exists(youtube_to_names_path):
         raise FileNotFoundError(f"youtube_to_name.json not found in input folder: {input_folder}")
 
+
+    composition_idx = 0
+     
+    for composition_name in os.listdir(input_folder):
+        composition_folder = os.path.join(input_folder, composition_name)
+
+        if not os.path.isdir(composition_folder):
+            continue
+
+        print(composition_idx, composition_name)
+        composition_idx += 1
+
+    composition_idx = 0
     for composition_name in os.listdir(input_folder):
         composition_folder = os.path.join(input_folder, composition_name)
         if not os.path.isdir(composition_folder):
             continue
+        
+        print("\n\n\n\n\n", composition_idx, composition_name)
+        composition_idx += 1
 
         cropped_images_src = os.path.join(composition_folder, "output", "cropped_images")
         cropped_images_dst = os.path.join(output_folder, "images", composition_name)
@@ -188,14 +246,17 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
         island_locations_src = os.path.join(composition_folder, "output", "island_locations.json")
         island_locations_dst = os.path.join(output_folder, "images_metadata", f"{composition_name}.json")
         mxl_src = next((os.path.join(composition_folder, f) for f in os.listdir(composition_folder) if f.endswith('modified.musicxml')), None)
+        
+        print(island_locations_src, mxl_src)
+        
         timing_dst = os.path.join(output_folder, "timings", composition_name, "measure_times.json")
         youtube_to_name_dst = os.path.join(output_folder, "timings", composition_name, "youtube_to_name.json")
     
-        measure_times = get_measure_times(mxl_src)
+        timings = get_measure_times(mxl_src)
     
-        if measure_times is None:
+        if timings is None:
             continue 
-            
+
         os.makedirs(cropped_images_dst, exist_ok=True)
         os.makedirs(os.path.dirname(island_locations_dst), exist_ok=True)
         os.makedirs(os.path.dirname(timing_dst), exist_ok=True)
@@ -214,7 +275,7 @@ def copy_and_rename_folder(input_folder, output_folder="site"):
         shutil.copy2(youtube_to_names_path, youtube_to_name_dst)
         print(f"Copied {youtube_to_names_path} to {youtube_to_name_dst}")
 
-        save_to_json(measure_times, timing_dst)
+        save_to_json(timings, timing_dst)
         print(f"Saved measure times to {timing_dst}")
         
         try:
@@ -235,3 +296,4 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     copy_and_rename_folder(args.input, args.output)
+

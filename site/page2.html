@@ -64,22 +64,30 @@
             document.getElementById('title').innerText = `Score Sheet for ${name}`;
 
             fetch('images.json')
-                .then(response => response.json())
-                .then(data => {
-                    const images = data[params.get('name')] || [];
-                    const imageContainer = document.getElementById('images');
-                    images.forEach((image, index) => {
-                        const img = document.createElement('img');
-                        img.src = `images/${params.get('name')}/${image}`;
-                        img.alt = `Image ${index + 1}`;
-                        img.addEventListener('click', () => {
-                            document.getElementById('iframe').src = `page3.html?name=${params.get('name')}&image=${image}`;
-                            updateSelectedImage(img);
-                        });
-                        imageContainer.appendChild(img);
-                    });
-                })
-                .catch(error => console.error('Error fetching images:', error));
+	    .then(response => response.json())
+	    .then(data => {
+		const images = data[params.get('name')] || [];
+
+		// Sort images numerically based on any number in the filename
+		images.sort((a, b) => {
+		    const numA = parseInt(a.match(/\d+/), 10);
+		    const numB = parseInt(b.match(/\d+/), 10);
+		    return numA - numB;
+		});
+
+		const imageContainer = document.getElementById('images');
+		images.forEach((image, index) => {
+		    const img = document.createElement('img');
+		    img.src = `images/${params.get('name')}/${image}`;
+		    img.alt = `Image ${index + 1}`;
+		    img.addEventListener('click', () => {
+		        document.getElementById('iframe').src = `page3.html?name=${params.get('name')}&image=${image}`;
+		        updateSelectedImage(img);
+		    });
+		    imageContainer.appendChild(img);
+		});
+	    })
+	    .catch(error => console.error('Error fetching images:', error));
 
             function updateSelectedImage(selectedImg) {
                 console.log("Updating selected image...");

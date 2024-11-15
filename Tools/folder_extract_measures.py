@@ -4,8 +4,11 @@ import argparse
 import numpy as np
 from PIL import Image
 import re 
+import cv2 
 
-def crop_white_edges(image_data):
+DEBUG = False 
+
+def crop_white_edges(image_data, delta = 1):
     white_threshold = 250
     first_non_white_row, last_non_white_row = None, None
 
@@ -16,16 +19,15 @@ def crop_white_edges(image_data):
             last_non_white_row = i
 
     if first_non_white_row is not None and last_non_white_row is not None:
-        return image_data[first_non_white_row:last_non_white_row + 1, :]
+        return image_data[first_non_white_row:last_non_white_row + delta, :]
+    
     return image_data
 
-def find_islands(image_path, black_threshold=150, min_length=220, skip_pixels=7):
-    factor = 5
-    min_length /= factor
-    min_length -= 2
-
+def resize_and_crop_image(image_path, factor):
     image = Image.open(image_path).convert('L')
     image_array = np.array(image)
+    image_array = crop_white_edges(image_array, delta = 10)
+    
     new_height, new_width = image_array.shape[0] // factor, image_array.shape[1] // factor
 
     resized_array = np.zeros((new_height, new_width), dtype=image_array.dtype)
@@ -35,41 +37,82 @@ def find_islands(image_path, black_threshold=150, min_length=220, skip_pixels=7)
             resized_array[i, j] = np.min(block)
 
     image_data = crop_white_edges(resized_array)
+    return image_data
+
+def remove_consecutive_values(x_vals):
+    result = []
+    for i in range(len(x_vals)):
+        if i == 0 or x_vals[i] != x_vals[i-1] + 1:
+            result.append(x_vals[i])
+    return result
+
+def max_continuous_ones(image_data):
+    # Use numpy to find the maximum count of consecutive 1s in each row
+    def max_consecutive_ones(row):
+        # Find indices where values are 0
+        zero_indices = np.where(row == 0)[0]
+        # Split the row at zero indices and calculate lengths of segments of 1s
+        ones_segments = zero_indices[1:] - zero_indices[:-1]
+
+        max_count = np.max(ones_segments)
+        return max_count
+
+    max_counts = np.apply_along_axis(max_consecutive_ones, axis=1, arr=image_data)
+    return max_counts
+
+def find_islands(image_path, black_threshold=150, skip_pixels=7):
+    factor = 5
     
-    island_columns, ys = set(), []
-    col, first_center = 0, None
+    image_data = resize_and_crop_image(image_path, factor)
+    image_data[image_data < black_threshold] = 0
+    image_data[image_data >= black_threshold] = 255
+    image_data //= 255
+
+    island_columns, ys = [], []
+
+    if DEBUG:
+        # Convert image to RGB
+        image_with_lines = cv2.cvtColor(image_data * 255, cv2.COLOR_GRAY2RGB)
+
+    # Sum all X-axis values for each level of Y
+    y_sums = max_continuous_ones(1 - image_data)
+
+    # Scatter plot of values in the top 10% of maximum y_sums
+    max_value = np.max(y_sums)
+    threshold = 0.99 * max_value
+    x_vals = remove_consecutive_values(np.where(y_sums >= threshold)[0])
+    x_vals.sort()
     
-    while col < image_data.shape[1]:
-        current_count, h = 0, image_data.shape[0]
-    
-        for row in range(h):
-            if image_data[row, col] < black_threshold:
-                current_count += 1
+    if len(x_vals) >= 10:
+        y0 = x_vals[-10]
+        y1 = x_vals[-1]
+        ys = [y0, y1]
+
+        y_sum_total = np.sum(1 - (image_data[y0:y1 + 1, :]), axis=0)
+
+        # Scan all x values to determine if it is an island
+        x = 0
+        while x < y_sum_total.shape[0]:
+            if y_sum_total[x] >= 0.985 * (y1 - y0):
+                island_columns.append(x)
+                # Draw the red line to indicate the island
+                if DEBUG:
+                    cv2.line(image_with_lines, (x-1, y0), (x-1, y1), (0, 0, 255), 1)  # Red line
+                x += skip_pixels  # Skip pixels after finding an island
             else:
-                if current_count >= min_length:
-                    is_valid = False 
-                    if first_center is None:
-                        first_center = row - current_count * 0.5
-                        ys = [row - current_count, row]
-                        is_valid = True
-                    else:
-                        cur_center = row - current_count * 0.5
-                        if abs(cur_center - first_center) < 0.003 * h:
-                            is_valid = True
-                    
-                    print(col, current_count)
-                    
-                    if is_valid:
-                        island_columns.add(factor * col)
-                        col += skip_pixels
-                        break
-                current_count = 0
-        col += 1
-        
-    island_columns = sorted(list(island_columns))
-    if island_columns and island_columns[-1] < 0.9 * image_data.shape[1] * factor:
-        island_columns.append(factor * image_data.shape[1] - 1)
-    
+                x += 1
+
+    # Display image with lines at x_vals
+    if DEBUG:
+        for x in x_vals:
+            cv2.line(image_with_lines, (0, x), (image_with_lines.shape[1], x), (255, 0, 0), 1)  # Blue line
+
+        # Show the image using OpenCV
+        cv2.imshow('Image with Detected Lines', image_with_lines)
+        while True:
+            if cv2.waitKey(1) & 0xFF == 13:  # Wait for the Enter key
+                break
+
     return island_columns, ys
 
 def ocr_measures(json_file_path):

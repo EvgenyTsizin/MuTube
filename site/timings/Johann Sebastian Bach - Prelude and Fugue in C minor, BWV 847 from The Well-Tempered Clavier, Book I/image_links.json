@@ -2,96 +2,50 @@
     "page-1.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
-            "timing": 0.0
+            "timing": 8.249999999999998
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
-            "timing": 0.0
+            "timing": 7.089999999999996
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
-            "timing": 0.0
+            "timing": 9.650000000000002
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
-            "timing": 0.0
+            "timing": 0.42999999999999994
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
-            "timing": 0.0
+            "timing": 2.5700000000000003
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
-            "timing": 0.0
+            "timing": 17.31
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
-            "timing": 0.0
+            "timing": 0
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
-            "timing": 0.0
+            "timing": 0
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
-            "timing": 0.0
+            "timing": 0
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
-            "timing": 0.0
+            "timing": 0
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
-            "timing": 0.0
+            "timing": 1.13
         }
     ],
     "page-2.png": [
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
-            "timing": 2.0
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
-            "timing": 10.3
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
-            "timing": 2.0
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
-            "timing": 2.06
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
-            "timing": 3.78
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
-            "timing": 12.7
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
-            "timing": 3.2
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
-            "timing": 1.6
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
-            "timing": 2.22
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
-            "timing": 2.0
-        },
-        {
-            "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
-            "timing": 2.28
-        }
-    ],
-    "page-3.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
             "timing": 12.67
@@ -137,7 +91,7 @@
             "timing": 4.71
         }
     ],
-    "page-4.png": [
+    "page-3.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
             "timing": 14.88
@@ -183,50 +137,96 @@
             "timing": 6.5
         }
     ],
-    "page-5.png": [
+    "page-4.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
-            "timing": 17.16
+            "timing": 21.133
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
-            "timing": 30.6
+            "timing": 36.82
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
-            "timing": 17.5
+            "timing": 21.5
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
-            "timing": 8.125
+            "timing": 11.38
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
-            "timing": 12.22
+            "timing": 17.52
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
-            "timing": 25.76
+            "timing": 32.22
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
-            "timing": 13.62
+            "timing": 19.98
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
-            "timing": 6.74
+            "timing": 9.84
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
-            "timing": 7.847
+            "timing": 12.035
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
-            "timing": 9.74
+            "timing": 15.48
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
-            "timing": 8.04
+            "timing": 11.64
+        }
+    ],
+    "page-5.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
+            "timing": 30.22
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
+            "timing": 52.52
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
+            "timing": 33.12
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
+            "timing": 17.38
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
+            "timing": 23.4
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
+            "timing": 58.72
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
+            "timing": 37.52
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
+            "timing": 16.84
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
+            "timing": 20.1
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
+            "timing": 24.3
+        },
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
+            "timing": 18.16
         }
     ],
     "page-6.png": [
@@ -692,47 +692,47 @@
     "page-16.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
-            "timing": 115.17
+            "timing": 121.36
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
-            "timing": 130.37
+            "timing": 134.52
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
-            "timing": 156.35
+            "timing": 160.48
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
-            "timing": 132.58
+            "timing": 138.72
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
-            "timing": 159.57
+            "timing": 166.06
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
-            "timing": 130.65
+            "timing": 135.96
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
-            "timing": 181.93
+            "timing": 185.54
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
-            "timing": 129.71
+            "timing": 136.34
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
-            "timing": 110.514
+            "timing": 115.92
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
-            "timing": 102.07
+            "timing": 108.18
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
-            "timing": 101.35
+            "timing": 107.28
         }
     ],
     "page-17.png": [
@@ -1014,47 +1014,47 @@
     "page-23.png": [
         {
             "youtube_link": "https://www.youtube.com/watch?v=HB8-w5CvMls",
-            "timing": 183.74
+            "timing": 187.8
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=Ds5huNVorfE",
-            "timing": 186.46
+            "timing": 190.86
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=w9NRpxJayO4",
-            "timing": 203.3
+            "timing": 212.56
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=WjD0WiPBdlw",
-            "timing": 197.4
+            "timing": 201.096
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=FR8kWqXzu_A",
-            "timing": 219.54
+            "timing": 225.88
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=yiTYozuG-eE",
-            "timing": 175.34
+            "timing": 184.28
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=8fWQ6MXuGjw",
-            "timing": 249.6
+            "timing": 254.76
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=VwdiZ6v07Uw",
-            "timing": 190.72
+            "timing": 194.38
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=uFwKFI9-LG0",
-            "timing": 152.86
+            "timing": 157.38
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=R0nZjkh-U7I",
-            "timing": 165.42
+            "timing": 171.64
         },
         {
             "youtube_link": "https://www.youtube.com/watch?v=jhOIZSYBz1g",
-            "timing": 169.5
+            "timing": 174.48
         }
     ],
     "page-24.png": [
