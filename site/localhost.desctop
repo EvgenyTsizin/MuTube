@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Localhost Server
-Comment=Open Localhost Server in Browser
-Exec=xdg-open http://localhost:8000/index.html
-Icon=browser
-Terminal=false
-Type=Application
-
