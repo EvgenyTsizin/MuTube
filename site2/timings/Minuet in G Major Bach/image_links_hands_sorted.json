@@ -1,0 +1,44 @@
+{
+    "page-1.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 0.0
+        }
+    ],
+    "page-2.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 11.5
+        }
+    ],
+    "page-3.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 12.92
+        }
+    ],
+    "page-4.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 22.68
+        }
+    ],
+    "page-5.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 46.96
+        }
+    ],
+    "page-6.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 56.82
+        }
+    ],
+    "page-7.png": [
+        {
+            "youtube_link": "https://www.youtube.com/watch?v=l05ndIo1hyU",
+            "timing": 58.34
+        }
+    ]
+}
