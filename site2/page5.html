@@ -16,7 +16,7 @@
         }
         #image-section {
             width: 50%;
-            height: 500px;
+            height: 500px; /* Fixed height for the left section */
             overflow-y: auto;
             border-right: 2px solid #ccc;
             padding: 10px;
@@ -67,7 +67,7 @@
             margin-top: 20px;
         }
         .controls {
-            margin-top: 20px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: center;
             gap: 10px;
@@ -81,17 +81,11 @@
             width: 100%;
             height: 360px;
             border: none;
-            margin-top: 10px;
         }
         .video-title {
             margin-top: 10px;
             font-size: 32px;
             color: black;
-        }
-        .debug-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: red;
         }
     </style>
     <script>
@@ -107,47 +101,6 @@
             let currentPageIndex = 0;
             let imageToVideoIndexMap = {};
             let videoTitleCache = {}; // Cache for video IDs to titles
-
-            // Function to synchronize the height of the image section
-            function synchronizeHeight() {
-                const viewerSection = document.getElementById('viewer-section');
-                const imageSection = document.getElementById('image-section');
-                imageSection.style.height = `${viewerSection.offsetHeight}px`;
-            }
-
-            // Load images for the left section
-            fetch('images.json')
-                .then(response => response.json())
-                .then(data => {
-                    const images = data[name] || [];
-                    const sortedImages = images.sort((a, b) => {
-                        const numA = parseInt(a.match(/\d+/), 10);
-                        const numB = parseInt(b.match(/\d+/), 10);
-                        return numA - numB;
-                    });
-
-                    const imageContainer = document.getElementById('images');
-                    sortedImages.forEach((image, index) => {
-                        const img = document.createElement('img');
-                        img.src = `${imagesUrl}/${image}`;
-                        img.alt = `Image ${index + 1}`;
-                        img.dataset.index = index;
-                        img.addEventListener('click', () => {
-                            currentPageIndex = index; // Keep track of current page index from image click
-                            playingIndex = imageToVideoIndexMap[image] !== undefined ? imageToVideoIndexMap[image] : playingIndex; // Restore the playing index for this image
-                            loadImageAndVideos(image);
-                        });
-                        if (index === 0) {
-                            loadImageAndVideos(image);
-                            img.classList.add('selected');
-                        }
-                        imageContainer.appendChild(img);
-                    });
-
-                    // Synchronize height after loading images
-                    synchronizeHeight();
-                })
-                .catch(error => console.error('Error fetching images:', error));
 
             function fetchYouTubeTitle(videoId, callback) {
                 if (videoTitleCache[videoId]) {
@@ -192,9 +145,6 @@
                 // Update selected image style
                 document.querySelectorAll('#images img').forEach(img => img.classList.remove('selected'));
                 document.querySelector(`img[src="${imagesUrl}/${image}"]`).classList.add('selected');
-
-                // Synchronize height
-                synchronizeHeight();
             }
 
             function renderVideos() {
@@ -207,43 +157,73 @@
                 const videoId = youtube_link.split('v=')[1];
 
                 fetchYouTubeTitle(videoId, (title) => {
+                    const controls = document.createElement('div');
+                    controls.className = 'controls';
+
+                    const prevButton = document.createElement('button');
+                    prevButton.id = 'prev';
+                    prevButton.textContent = '<- Prev';
+                    prevButton.addEventListener('click', () => {
+                        playingIndex = (playingIndex - 1 + videoList.length) % videoList.length;
+                        renderVideos();
+                    });
+
+                    const nextButton = document.createElement('button');
+                    nextButton.id = 'next';
+                    nextButton.textContent = 'Next ->';
+                    nextButton.addEventListener('click', () => {
+                        playingIndex = (playingIndex + 1) % videoList.length;
+                        renderVideos();
+                    });
+
+                    controls.appendChild(prevButton);
+                    controls.appendChild(nextButton);
+
+                    videoContainer.appendChild(controls);
+
                     const iframe = document.createElement('iframe');
                     iframe.src = `https://www.youtube.com/embed/${videoId}?start=${Math.floor(timing)}&autoplay=1`;
                     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
 
                     videoContainer.appendChild(iframe);
 
-                    if (DEBUG) {
-                        const debugInfo = document.createElement('div');
-                        debugInfo.className = 'debug-info';
-                        debugInfo.textContent = `Title: ${title}, Current Page Index: ${currentPageIndex}, Playing Index: ${playingIndex}, YouTube Link: ${youtube_link}`;
-                        videoContainer.appendChild(debugInfo);
-                    } else {
+                    if (!DEBUG) {
                         const videoTitle = document.createElement('div');
                         videoTitle.className = 'video-title';
                         videoTitle.textContent = title;
                         videoContainer.appendChild(videoTitle);
                     }
                 });
-
-                // Save the current playing index for the current image
-                const currentImage = document.querySelector(`#images img.selected`).src.split('/').pop();
-                imageToVideoIndexMap[currentImage] = playingIndex;
             }
 
-            // Button handlers for video navigation
-            document.getElementById('prev').addEventListener('click', () => {
-                playingIndex = (playingIndex - 1 + videoList.length) % videoList.length;
-                renderVideos();
-            });
+            // Initial setup to load content for the first image
+            fetch('images.json')
+                .then(response => response.json())
+                .then(data => {
+                    const images = data[name] || [];
+                    const sortedImages = images.sort((a, b) => {
+                        const numA = parseInt(a.match(/\d+/), 10);
+                        const numB = parseInt(b.match(/\d+/), 10);
+                        return numA - numB;
+                    });
 
-            document.getElementById('next').addEventListener('click', () => {
-                playingIndex = (playingIndex + 1) % videoList.length;
-                renderVideos();
-            });
+                    const imageContainer = document.getElementById('images');
+                    sortedImages.forEach((image, index) => {
+                        const img = document.createElement('img');
+                        img.src = `${imagesUrl}/${image}`;
+                        img.alt = `Image ${index + 1}`;
+                        img.dataset.index = index;
+                        img.addEventListener('click', () => {
+                            loadImageAndVideos(image);
+                        });
+                        imageContainer.appendChild(img);
+                    });
 
-            // Synchronize height on window resize
-            window.addEventListener('resize', synchronizeHeight);
+                    if (images.length > 0) {
+                        loadImageAndVideos(images[0]);
+                    }
+                })
+                .catch(error => console.error('Error loading images:', error));
         });
     </script>
 </head>
@@ -255,10 +235,6 @@
     <div id="viewer-section">
         <img id="image" src="" alt="Selected Image">
         <div id="videos" class="video-container"></div>
-        <div class="controls">
-            <button id="prev">&lt;- Prev</button>
-            <button id="next">Next -&gt;</button>
-        </div>
     </div>
 </body>
 </html>
