@@ -10,7 +10,7 @@ The site curently allows to choose notes - and the site provides youtube links t
 -----
 # What is currently working?
 
-This demo [site](https://evgenytsizin.github.io/MuTube/site/index.html) currently contains 3 musical pieces, it has notes for each: 
+This demo [site](https://evgenytsizin.github.io/MuTube/site2/index.html) currently contains 3 musical pieces, it has notes for each: 
 
 1. F.Liszt Dante Sonata S.161 No.7
 2. Nocturne No. 20 in C Minor
