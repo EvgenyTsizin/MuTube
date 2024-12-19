@@ -77,6 +77,11 @@
             border: none;
             margin-top: 10px;
         }
+        .video-title {
+            margin-top: 10px;
+            font-size: 24px;
+            color: black;
+        }
         .debug-info {
             margin-top: 10px;
             font-size: 14px;
@@ -85,17 +90,17 @@
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const DEBUG = true;
+            const DEBUG = false;
             const params = new URLSearchParams(window.location.search);
             const name = params.get('name') || 'default';
             const imagesUrl = `images/${name}`;
             const timingsPath = `timings/${name}/image_links.json`;
-            const youtubeToNamePath = `timings/${name}/youtube_to_name.json`;
 
             let videoList = [];
             let playingIndex = 0;
             let currentPageIndex = 0;
             let imageToVideoIndexMap = {};
+            let videoTitleCache = {}; // Cache for video IDs to titles
 
             // Load images for the left section
             fetch('images.json')
@@ -128,6 +133,31 @@
                 })
                 .catch(error => console.error('Error fetching images:', error));
 
+            function fetchYouTubeTitle(videoId, callback) {
+                if (videoTitleCache[videoId]) {
+                    callback(videoTitleCache[videoId]);
+                    return;
+                }
+
+                const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
+
+                fetch(noembedUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.title) {
+                            videoTitleCache[videoId] = data.title; // Cache the title
+                            callback(data.title);
+                        } else {
+                            console.error('Title not found for video:', videoId);
+                            callback('Unknown Title');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching YouTube title:', error);
+                        callback('Unknown Title');
+                    });
+            }
+
             function loadImageAndVideos(image) {
                 // Fetch video data for the clicked image
                 fetch(timingsPath)
@@ -157,18 +187,25 @@
                 const { youtube_link, timing } = currentVideo;
                 const videoId = youtube_link.split('v=')[1];
 
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${videoId}?start=${Math.floor(timing)}&autoplay=1`;
-                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                fetchYouTubeTitle(videoId, (title) => {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${videoId}?start=${Math.floor(timing)}&autoplay=1`;
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
 
-                videoContainer.appendChild(iframe);
+                    videoContainer.appendChild(iframe);
 
-                if (DEBUG) {
-                    const debugInfo = document.createElement('div');
-                    debugInfo.className = 'debug-info';
-                    debugInfo.textContent = `Current Page Index: ${currentPageIndex}, Playing Index: ${playingIndex}, YouTube Link: ${youtube_link}`;
-                    videoContainer.appendChild(debugInfo);
-                }
+                    if (DEBUG) {
+                        const debugInfo = document.createElement('div');
+                        debugInfo.className = 'debug-info';
+                        debugInfo.textContent = `Title: ${title}, Current Page Index: ${currentPageIndex}, Playing Index: ${playingIndex}, YouTube Link: ${youtube_link}`;
+                        videoContainer.appendChild(debugInfo);
+                    } else {
+                        const videoTitle = document.createElement('div');
+                        videoTitle.className = 'video-title';
+                        videoTitle.textContent = title;
+                        videoContainer.appendChild(videoTitle);
+                    }
+                });
 
                 // Save the current playing index for the current image
                 const currentImage = document.querySelector(`#images img.selected`).src.split('/').pop();
@@ -203,4 +240,3 @@
     </div>
 </body>
 </html>
-
