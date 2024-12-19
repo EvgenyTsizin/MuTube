@@ -14,18 +14,19 @@
             display: flex;
             height: 100vh;
         }
-        #image-section, #viewer-section {
-            flex: 1;
-            height: 100%;
-            min-height: 100%;
-            box-sizing: border-box;
-        }
         #image-section {
             width: 50%;
             overflow-y: auto;
             border-right: 2px solid #ccc;
             padding: 10px;
             text-align: center;
+            box-sizing: border-box;
+        }
+        #viewer-section {
+            width: 50%;
+            padding: 10px;
+            position: relative;
+            box-sizing: border-box;
         }
         #image-section h1 {
             margin-top: 20px;
@@ -53,11 +54,6 @@
             border: 3px solid blue;
             transform: scale(1.05);
             background-color: rgba(0, 0, 0, 0.8);
-        }
-        #viewer-section {
-            width: 50%;
-            padding: 10px;
-            position: relative;
         }
         #viewer-section img {
             width: 100%;
@@ -111,6 +107,13 @@
             let imageToVideoIndexMap = {};
             let videoTitleCache = {}; // Cache for video IDs to titles
 
+            // Function to synchronize the height of the image section
+            function synchronizeHeight() {
+                const viewerSection = document.getElementById('viewer-section');
+                const imageSection = document.getElementById('image-section');
+                imageSection.style.height = `${viewerSection.offsetHeight}px`;
+            }
+
             // Load images for the left section
             fetch('images.json')
                 .then(response => response.json())
@@ -139,6 +142,9 @@
                         }
                         imageContainer.appendChild(img);
                     });
+
+                    // Synchronize height after loading images
+                    synchronizeHeight();
                 })
                 .catch(error => console.error('Error fetching images:', error));
 
@@ -185,6 +191,9 @@
                 // Update selected image style
                 document.querySelectorAll('#images img').forEach(img => img.classList.remove('selected'));
                 document.querySelector(`img[src="${imagesUrl}/${image}"]`).classList.add('selected');
+
+                // Synchronize height
+                synchronizeHeight();
             }
 
             function renderVideos() {
@@ -231,6 +240,9 @@
                 playingIndex = (playingIndex + 1) % videoList.length;
                 renderVideos();
             });
+
+            // Synchronize height on window resize
+            window.addEventListener('resize', synchronizeHeight);
         });
     </script>
 </head>
