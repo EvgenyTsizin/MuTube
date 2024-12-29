@@ -82,7 +82,7 @@ python Tools/attach_musicfile_to_name.py <folder>
 
 The script will generate *youtube_with_notes.json* this file will have all the data for the next step.
 
-Note: The format of youtube_with_notes.json
+Note: The format of *youtube_with_notes.json*
 ```
 [
   [
@@ -103,6 +103,15 @@ Note: The format of youtube_with_notes.json
 ]
 ```
 
+Note: You will need to have mxl files in this folder. For the example provided you will need to have 
+```
+Sonate_No._14_Moonlight_1st_Movement.mxl 
+WA_Mozart_Marche_Turque_Turkish_March_fingered.mxl 
+```
+
+in the same folder with *youtube_with_notes.json*
+
+
 6. Download all data needed from youtubes.
 
 Note: You need to place mxls into the same folder as youtube_with_notes.json
@@ -119,7 +128,9 @@ It will create directories by purified title of the piece (search term) and copy
 -----------------------------
 ## Stage1: Sync youtube with mxl. 
 
-1. Generate mp3s from the mxls. 
+### Method A (old) generates single file from mxl. 
+
+1A. Generate mp3s from the mxls. 
 
 run
 ```
@@ -128,13 +139,45 @@ python Tools/mxls_to_mp3.py -i <folder> -m <musescore_path>
 
 it will scan all subfolders and will convert all mxls in the subdirectories to mp3 using musescore. 
 
-2. Convert all mp3 extracted from youtube and generated to wav inside the subfolder <composition>: 
+Example:
+```
+python Tools/mxls_to_mp3.py -i 'Pieces3/youtubes' -m '/media/simsim314/DATA/Downloads/MuseScore-Studio-4.4.3.242971445-x86_64.AppImage' 
+```
+
+2A. Convert all mp3 extracted from youtube and generated to wav inside the subfolder <composition>: 
 run 
 ```
 python Tools/mp3_to_wav.py -i <folder>
 ```
 
-3. Now we need to sync all audio files timing.
+3A. Now we need to sync all audio files timing.
+
+run
+```
+cd synctoolbox
+python sync_all_pieces.py -d <Pieces\youtubes> --use_combine False
+cd ..
+```
+
+This will create *audio_sync.json* in each youtube subfolder of each composition with the wav generated from the whole score. 
+Notice: you need to pass the youtube folder with all pieces. 
+
+### Method B (new) generates folder with wav for each measure, and combines them. 
+
+1B.
+
+run
+```
+python Tools/mxls_to_combined_wav.py -i <youtubes_folder> -m <musescore_path> [--split-only] [--combine-only]
+```
+
+This will run two parts: 
+- Split the mxl into measures and generate inside `output/measure_combined` all measures, mp3s and wavs per each part.
+- Combine operation combine wavs, crop timing and overlay parts into `combined.wav`, metadata in `play_order.json`
+
+Note: you can run each operation seperatedly as split takes long time to run while combine is relatively fast. 
+
+2B. sync all audio files timing with the combined.wav.
 
 run
 ```
@@ -142,8 +185,11 @@ cd synctoolbox
 python sync_all_pieces.py -d <Pieces\youtubes>
 cd ..
 ```
-This will create *audio_sync.json* in each youtube subfolder of each composition. 
+
+This will create *audio_sync.json* in each youtube subfolder of each composition with the combined.wav. 
+
 Notice: you need to pass the youtube folder with all pieces. 
+
 
 ## Stage2: Extract images + timing from mxl. 
 
@@ -151,9 +197,16 @@ Notice: you need to pass the youtube folder with all pieces.
 
 run 
 ```
-python Tools/save_images_in_folder.py -i <Pieces\youtubes>
+python Tools/save_images_in_folder.py -i <Pieces\youtubes> -m <model>
 ```
+
 This will generate in each subfolder of Pieces\youtubes\<composition> a new output/__images__ subfolder. 
+
+Example:
+
+```
+python Tools/save_images_in_folder.py -i 'Pieces3/youtubes' -m '/media/simsim314/DATA/Downloads/MuseScore-Studio-4.4.3.242971445-x86_64.AppImage' 
+```
 
 2. Add ocr data of the images for improved following of measures.
 
@@ -177,15 +230,25 @@ This will generate `output/cropped_images` (cropped images) and `output/island_l
 
 ### Stage 3: Site Data
 
-1. Prepare all data for the site and copy relevant data.
+If you used the old method A then use: 
+
+1A. Prepare all data for the site and copy relevant data.
 
 Run:
 ```
-python Tools/copy_compositions_to_site.py -i Pieces/youtubes [-o site]
+python Tools/copy_compositions_to_site_old.py -i Pieces/youtubes [-o site]
 ```
 
 - **`-i <Pieces/youtubes>`**: Root folder containing composition subfolders.
 - **`-o` or `--output`**: Optional, specifies the output site folder (default is `site`).
+
+If you used the new method B then use: 
+
+1B. 
+
+```
+python Tools/copy_compositions_to_site.py -i Pieces/youtubes [-o site]
+```
 
 2. Prepare *image_to_youtube_timing* for page3.html 
 

@@ -2,7 +2,15 @@ import json
 import os
 import argparse
 from os.path import join
+import re 
 
+def sanitize_filename(filename):
+    invalid_chars_pattern = r'[’“”<>:"/\\|?*\x00-\x1F]'
+
+    # Remove invalid characters by replacing them with an empty string
+    return re.sub(invalid_chars_pattern, "", filename)
+
+    
 # Function to load JSON data from a file with UTF-8 encoding
 def load_json(filepath):
     with open(filepath, 'r', encoding='utf-8') as file:
@@ -11,7 +19,7 @@ def load_json(filepath):
 def process_composition(youtube_to_name_file, youtube_timing_folder, images_metadata_file, images_folder, output_file):
     # Check if output file already exists
     if os.path.exists(output_file):
-        print(f"Output file {output_file} already exists. Skipping processing.")
+        #print(f"Output file {output_file} already exists. Skipping processing.")
         return
 
     # Load youtube_to_name.json
@@ -33,10 +41,12 @@ def process_composition(youtube_to_name_file, youtube_timing_folder, images_meta
 
         # Iterate over each YouTube link and find the timing
         for youtube_link, youtube_name in youtube_to_name.items():
+            youtube_name = sanitize_filename(youtube_name)
+            
             timing_filepath = os.path.join(youtube_timing_folder, f'{youtube_name}.json')
             if not os.path.exists(timing_filepath):
                 continue
-
+            #print(timing_filepath)
             timing_data = load_json(timing_filepath)
             timing = timing_data.get(str(measure_index))
             if timing is not None:

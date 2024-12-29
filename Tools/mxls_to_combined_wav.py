@@ -51,8 +51,7 @@ def convert_mxl_to_mp3(mxl_path):
     and then running the external generate_wav.py script.
     """
     modified_xml_file = mxl_path[:-4] + '_modified.musicxml'
-    
- 
+     
     # Remove tempo information from the MusicXML file
     remove_tempo_information(mxl_path, modified_xml_file)
     
@@ -73,7 +72,7 @@ def convert_mxl_to_mp3(mxl_path):
     ]
     
     # Execute the command
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run(command)
     
     if result.returncode != 0:
         print("Error during conversion:")

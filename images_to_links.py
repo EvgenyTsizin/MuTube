@@ -1,14 +1,19 @@
 import json
 import os
 import argparse
-from os.path import join 
+from os.path import join
 
 # Function to load JSON data from a file with UTF-8 encoding
 def load_json(filepath):
     with open(filepath, 'r', encoding='utf-8') as file:
         return json.load(file)
 
-def main(youtube_to_name_file, youtube_timing_folder, images_metadata_file, images_folder, output_file):
+def process_composition(youtube_to_name_file, youtube_timing_folder, images_metadata_file, images_folder, output_file):
+    # Check if output file already exists
+    if os.path.exists(output_file):
+        print(f"Output file {output_file} already exists. Skipping processing.")
+        return
+
     # Load youtube_to_name.json
     youtube_to_name = load_json(youtube_to_name_file)
     
@@ -44,23 +49,26 @@ def main(youtube_to_name_file, youtube_timing_folder, images_metadata_file, imag
     with open(output_file, 'w', encoding='utf-8') as output_file:
         json.dump(output_data, output_file, indent=4, ensure_ascii=False)
 
-    print(f"Process completed successfully. Output saved to {output_file}")
+    print(f"Process completed successfully. Output saved to {output_file.name}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images and extract YouTube timings.")
     
-    parser.add_argument('-c', '--composition_name', required=True, help="composition name path.")
-    
-    parser.add_argument('-o', '--output', required=False, default = "site", help="site path")
+    parser.add_argument('-o', '--output', required=False, default="site", help="site path")
 
     args = parser.parse_args()
     
-    composition_name = args.composition_name
-    
-    youtube_to_name = join(args.output, "timings", composition_name, "youtube_to_name.json")
-    youtube_timing_folder = join(args.output, "timings", composition_name, "youtube_score_mappings") 
-    images_metadata_file = join(args.output, "images_metadata", composition_name + ".json")
-    images_folder = join(args.output, "images", composition_name)
-    output = join(args.output, "timings", composition_name, "image_links.json") 
-    
-    main(youtube_to_name, youtube_timing_folder, images_metadata_file, images_folder,output)
+    site_path = args.output
+
+    timings_folder = join(site_path, "timings")
+    compositions = [name for name in os.listdir(timings_folder) if os.path.isdir(join(timings_folder, name))]
+
+    for composition_name in compositions:
+        youtube_to_name = join(timings_folder, composition_name, "youtube_to_name.json")
+        youtube_timing_folder = join(timings_folder, composition_name, "youtube_score_mappings") 
+        images_metadata_file = join(site_path, "images_metadata", composition_name + ".json")
+        images_folder = join(site_path, "images", composition_name)
+        output = join(timings_folder, composition_name, "image_links.json") 
+        
+        process_composition(youtube_to_name, youtube_timing_folder, images_metadata_file, images_folder, output)
+
