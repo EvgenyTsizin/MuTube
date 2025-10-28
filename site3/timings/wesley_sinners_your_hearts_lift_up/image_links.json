@@ -1,0 +1,30 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=G4wjnDekMx4",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=qsS50vqe4Zo",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=Wfh9x4nnyFE",
+      "timing": 0.4
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=G4wjnDekMx4",
+      "timing": 12.8
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=qsS50vqe4Zo",
+      "timing": 12.8
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=Wfh9x4nnyFE",
+      "timing": 13.8
+    }
+  ]
+}

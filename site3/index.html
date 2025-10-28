@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Musical Pieces</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 2em;
+        }
+        /* Style for the main composer list item */
+        #piece-list > li {
+            margin-top: 1em;
+            font-weight: bold;
+            font-size: 1.1em;
+            list-style-type: none; /* Removes the bullet from the composer */
+        }
+        /* Style for the nested list of pieces */
+        #piece-list ul {
+            margin-left: 25px;
+            margin-top: 0.5em;
+            font-style: italic;
+            font-weight: normal;
+            list-style-type: disc; /* Adds the bullet back for pieces */
+        }
+        a {
+            text-decoration: none;
+            color: #0056b3;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>List of Musical Pieces:</h1>
+    <ul id="piece-list"></ul>
+
+    <script>
+        fetch('images.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 1. Create a new object to group pieces by composer
+                const composers = {};
+
+                // 2. Loop through the keys from images.json and group them
+                //    The original key (e.g., "albeniz_asturias_op_43") remains unchanged.
+                for (const originalKey in data) {
+                    // Split the key at the FIRST underscore only.
+                    const parts = originalKey.split('_');
+                    const composerName = parts.shift();      // Gets "albeniz"
+                    const pieceName = parts.join(' ');       // Gets "asturias op 43"
+
+                    // If we haven't seen this composer yet, create an array for them
+                    if (!composers[composerName]) {
+                        composers[composerName] = [];
+                    }
+
+                    // Add the piece info to the correct composer
+                    composers[composerName].push({
+                        key: originalKey, // The full, original key for the URL
+                        name: pieceName   // The display name for the list
+                    });
+                }
+
+                // 3. Build the nested HTML structure from the grouped object
+                const mainUl = document.getElementById('piece-list');
+                
+                // Get sorted composer names for an alphabetical list
+                const sortedComposers = Object.keys(composers).sort();
+
+                for (const composer of sortedComposers) {
+                    // Create the main list item for the composer
+                    const composerLi = document.createElement('li');
+                    // Capitalize first letter for display
+                    composerLi.textContent = composer.charAt(0).toUpperCase() + composer.slice(1);
+
+                    // Create the nested list for their pieces
+                    const piecesUl = document.createElement('ul');
+
+                    // Sort pieces for this composer alphabetically
+                    const sortedPieces = composers[composer].sort((a, b) => a.name.localeCompare(b.name));
+                    
+                    for (const piece of sortedPieces) {
+                        const pieceLi = document.createElement('li');
+                        const a = document.createElement('a');
+                        
+                        // The URL uses the original, flat key
+                        a.href = `page5.html?name=${piece.key}`;
+                        
+                        // The displayed text is the nicer, parsed name
+                        a.textContent = piece.name;
+                        
+                        pieceLi.appendChild(a);
+                        piecesUl.appendChild(pieceLi);
+                    }
+
+                    composerLi.appendChild(piecesUl);
+                    mainUl.appendChild(composerLi);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading or processing images.json:', error);
+                const list = document.getElementById('piece-list');
+                list.textContent = 'Could not load the list of pieces. Please check the console for errors.';
+            });
+    </script>
+</body>
+</html>

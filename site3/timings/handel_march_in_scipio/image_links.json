@@ -1,0 +1,86 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 1.1
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 0.4
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 11.88
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 10.9
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 12.5
+    }
+  ],
+  "staff_2.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 20.6
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 22.6
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 22.624
+    }
+  ],
+  "staff_3.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 33.3
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 37.96
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 36.68
+    }
+  ],
+  "staff_4.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 41.4369
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 42.5373
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 46.72
+    }
+  ],
+  "staff_5.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cAahaMABnw8",
+      "timing": 48.9
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=oOH9QvtbPA0",
+      "timing": 48.04
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=usQ-M8uvRYc",
+      "timing": 58.5
+    }
+  ]
+}

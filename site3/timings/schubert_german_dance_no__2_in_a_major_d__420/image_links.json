@@ -1,0 +1,100 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 0.58
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 7.84
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 6.98
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 4.8742
+    }
+  ],
+  "staff_2.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 12.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 9.74
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 5.0233
+    }
+  ],
+  "staff_3.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 20.3
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 12.7427
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 7.0932
+    }
+  ],
+  "staff_4.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 28.6
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 15.6096
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 7.5994
+    }
+  ],
+  "staff_5.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 34.06
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 17.4629
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 9.04
+    }
+  ],
+  "staff_6.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=c-Fbo_kTDSc",
+      "timing": 39.8
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=dtRRCxP0PGA",
+      "timing": 21.92
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=rvStI7h2AfY",
+      "timing": 13.84
+    }
+  ]
+}

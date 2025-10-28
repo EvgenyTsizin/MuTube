@@ -1,0 +1,100 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 0.4
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 15.3
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 16.0
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 43.04
+    }
+  ],
+  "staff_2.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 31.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 32.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 65.84
+    }
+  ],
+  "staff_3.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 46.66
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 49.7
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 88.22
+    }
+  ],
+  "staff_4.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 55.8214
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 66.7
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 119.3
+    }
+  ],
+  "staff_5.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 58.888
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 81.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 138.2
+    }
+  ],
+  "staff_6.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=cS6YZa1Tv4k",
+      "timing": 64.6
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=KNL0g9HeG_c",
+      "timing": 97.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=nKGYIPTsTtc",
+      "timing": 154.36
+    }
+  ]
+}

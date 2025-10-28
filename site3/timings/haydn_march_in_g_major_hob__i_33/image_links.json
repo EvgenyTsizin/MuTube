@@ -1,0 +1,44 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=4Df71meZHkk",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=a4lulM-X1Hc",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=_Yisni6bpI4",
+      "timing": 0.6
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=4Df71meZHkk",
+      "timing": 17.86
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=a4lulM-X1Hc",
+      "timing": 15.7
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=_Yisni6bpI4",
+      "timing": 27.9
+    }
+  ],
+  "staff_2.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=4Df71meZHkk",
+      "timing": 40.82
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=a4lulM-X1Hc",
+      "timing": 38.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=_Yisni6bpI4",
+      "timing": 42.0
+    }
+  ]
+}

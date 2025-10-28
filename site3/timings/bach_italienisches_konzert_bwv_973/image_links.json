@@ -1,0 +1,92 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 1.48
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 7.84
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 17.8
+    }
+  ],
+  "staff_2.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 15.6
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 30.4
+    }
+  ],
+  "staff_3.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 23.14
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 39.2
+    }
+  ],
+  "staff_4.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 41.8
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 73.5
+    }
+  ],
+  "staff_5.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 49.2
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 103.0
+    }
+  ],
+  "staff_6.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 57.0
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 117.18
+    }
+  ],
+  "staff_7.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 64.1
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 125.5
+    }
+  ],
+  "staff_8.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=9G1IQbYYW-k",
+      "timing": 111.8
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=tT7rX77XAl4",
+      "timing": 133.3
+    }
+  ]
+}

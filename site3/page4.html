@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Music Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .video-title {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        iframe {
+            width: 80%;
+            max-width: 800px;
+            height: 450px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        // Function to fetch and embed videos from pieces_with_notes.txt
+        async function loadVideos() {
+            try {
+                // Fetch the content of pieces_with_notes.txt
+                const response = await fetch('pieces_with_notes.txt');
+                const text = await response.text();
+
+                // Split content by new lines and process each line
+                const lines = text.trim().split('\n');
+                const videoContainer = document.getElementById('videos');
+
+                lines.forEach(line => {
+                    const [url, ...titleParts] = line.split(' ');
+                    const title = titleParts.join(' ');
+
+                    // Extract YouTube video ID from the URL
+                    const videoId = new URL(url).searchParams.get("v");
+
+                    // Create title and video elements
+                    const videoTitle = document.createElement('div');
+                    videoTitle.className = 'video-title';
+                    videoTitle.textContent = title.replace(/_/g, ' ');
+
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+
+                    // Append title and iframe to container
+                    videoContainer.appendChild(videoTitle);
+                    videoContainer.appendChild(iframe);
+                });
+            } catch (error) {
+                console.error('Error fetching or embedding videos:', error);
+            }
+        }
+
+        // Load videos once the page is fully loaded
+        window.onload = loadVideos;
+    </script>
+</head>
+<body>
+    <h1>Music Score Videos</h1>
+    <div id="videos" class="video-container"></div>
+</body>
+</html>
+

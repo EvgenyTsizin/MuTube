@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Media Viewer with Image Sync</title>
+    <link rel="icon" href="data:,"> <!-- Prevent favicon request -->
+    <style>
+        /* CSS Styles */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+        }
+
+        #image-section {
+            width: 50%;
+            height: 100%;
+            overflow-y: auto;
+            border-right: 2px solid #ccc;
+            padding: 10px;
+            text-align: center; /* Centers the h1 text */
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        #viewer-section {
+            width: 50%;
+            height: 100%;
+            padding: 10px;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center align items like the image and #videos */
+        }
+
+        #image-section h1 {
+            margin-top: 20px;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            padding-bottom: 10px;
+        }
+
+        #images {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* This centers the img children horizontally */
+            gap: 8px;
+            width: 100%; /* Ensure #images itself takes full width of #image-section */
+        }
+
+        #images img {
+            width: 75%;
+            max-width: 550px;
+            height: auto;
+            padding: 5px;
+            border: 3px solid transparent;
+            background-color: #f9f9f9;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #images img:hover {
+            transform: scale(1.03);
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+
+        #images img.selected {
+            border: 3px solid #0056b3;
+            transform: scale(1.03);
+            background-color: #d6eaff;
+        }
+
+        #viewer-section #image {
+            height: 25%;       /* Set fixed height */
+            width: auto;        /* Allow width to adjust based on height & aspect ratio */
+            max-width: 100%;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        #videos {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+            width: 100%;
+            flex-grow: 1;
+            position: relative;
+            min-height: 250px;
+        }
+
+        .player-container-wrapper {
+            width: 90%;
+            aspect-ratio: 16 / 9;
+            background-color: #111;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        #youtube-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-shrink: 0;
+            width: 90%; /* Match player width */
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* REMOVED #time-display CSS rule */
+
+        .video-title {
+            margin-top: 5px;
+            font-size: 24px;
+            color: black;
+            text-align: center;
+            flex-shrink: 0;
+            width: 90%; /* Match player width */
+            overflow-wrap: break-word; /* Help long titles wrap */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="image-section">
+        <h1>Images</h1>
+        <div id="images"></div>
+    </div>
+    <div id="viewer-section">
+        <img id="image" src="" alt="Selected Image"> <!-- Alt attribute will hold the filename -->
+        <div id="videos">
+            <!-- Content added by JS -->
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        // --- Global variables ---
+        let ytApiReady = false;
+        let player;
+        let timeUpdater = null;
+        let currentVideoSortedTimings = [];
+        let imageToVideoMap = {};
+        const videoTitleCache = {}; // Cache for fetched titles
+
+        // --- API Ready Callback ---
+        window.onYouTubeIframeAPIReady = function() {
+            ytApiReady = true;
+        };
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // --- Configuration ---
+            const DEBUG_NO_TITLES = false; // Keep false to enable title fetching
+            const params = new URLSearchParams(window.location.search);
+            const name = params.get('name') || 'default';
+            const imagesUrl = `images/${name}`;
+            const imageListPath = 'images.json';
+            const timingsPath = `timings/${name}/image_links.json`;
+            const SEEK_TOLERANCE = 1.5; // Seconds +/- allowed difference during initial seek
+
+            // --- State Variables ---
+            let videoList = []; // Holds video choices for the *originally selected* image
+            let playingIndex = 0; // Index within videoList
+            let initiallySelectedImageFilename = null;
+            // --- STATE VARIABLES for jump prevention ---
+            let isLoadingNewVideo = false; // True when Prev/Next/Initial load is seeking
+            let expectedStartTime = 0;     // The time the player SHOULD start at
+
+            // --- Fetch YouTube Title ---
+            function fetchYouTubeTitle(videoId, callback) {
+                 if (DEBUG_NO_TITLES) return callback(`Debug Title (ID: ${videoId})`);
+                 if (videoTitleCache[videoId]) return callback(videoTitleCache[videoId]);
+                 const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
+                 console.log("Fetching title from:", noembedUrl);
+                 fetch(noembedUrl)
+                     .then(response => {
+                         console.log(`Fetch response status for ${videoId}: ${response.status}`);
+                         if (!response.ok) { return Promise.reject(`Failed: ${response.status} ${response.statusText || ''}`); }
+                         return response.json();
+                     })
+                     .then(data => {
+                        console.log(`Parsed data for ${videoId}:`, JSON.stringify(data));
+                         if (data && data.title) { videoTitleCache[videoId] = data.title; callback(data.title); }
+                         else { console.warn(`Title property not found in noembed response for ${videoId}`); callback('Unknown Title'); }
+                     })
+                     .catch(error => { console.error(`Error fetching YouTube title for ${videoId}:`, error); callback('Unknown Title'); });
+            }
+
+            // --- Utility to Extract Video ID ---
+            function extractVideoId(url) {
+                if (!url) return null; try { let m=url.match(/[?&]v=([^&]+)/)||url.match(/youtu\.be\/([^?&]+)/)||url.match(/embed\/([^?&]+)/)||url.match(/live\/([^?&]+)/); if(m) return m[1]; } catch (e) {} return null;
+            }
+
+            // --- Build Sorted Timings for Current Video ---
+            function buildSortedTimingsForVideo(videoId) {
+                 currentVideoSortedTimings = []; if (!videoId || typeof imageToVideoMap !== 'object') return;
+                 for (const imgFile in imageToVideoMap) { const links = imageToVideoMap[imgFile]; if (Array.isArray(links)) {
+                 for (const l of links) { if (l && typeof l.youtube_link === 'string') { const linkedId = extractVideoId(l.youtube_link); if (linkedId === videoId)
+                 { currentVideoSortedTimings.push({ image: imgFile, timing: l.timing || 0 }); }}}}}
+                 currentVideoSortedTimings.sort((a, b) => a.timing - b.timing);
+            }
+
+            // --- Find Image Name from Current Time ---
+             function findImageForTime(currentTime) {
+                 if (!currentVideoSortedTimings || currentVideoSortedTimings.length === 0) return null;
+                 let activeImageFilename = null; for (const t of currentVideoSortedTimings) { if (currentTime >= t.timing) activeImageFilename = t.image; else break; } return activeImageFilename;
+             }
+
+            // --- Load Image and Associated Videos ---
+            function loadImageAndVideos(imageFilename) {
+                console.log("loadImageAndVideos called for:", imageFilename);
+                initiallySelectedImageFilename = imageFilename;
+                isLoadingNewVideo = false; // Reset state for fresh selection
+                expectedStartTime = 0;
+                stopTimer();
+
+                const imgElement = document.getElementById('image');
+                if (imgElement) { imgElement.src = `${imagesUrl}/${imageFilename}`; imgElement.alt = imageFilename; }
+                document.querySelectorAll('#images img').forEach(img => {
+                     const imgFile = img.dataset.imageFile || img.src.split('/').pop();
+                     if (imgFile === imageFilename) { img.classList.add('selected'); img.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                     else { img.classList.remove('selected'); }
+                });
+                if (Object.keys(imageToVideoMap).length === 0) { console.warn("imageToVideoMap is empty."); renderPlayerArea(); return; }
+                videoList = imageToVideoMap[imageFilename] || [];
+                playingIndex = 0;
+                renderPlayerArea();
+            }
+
+            // --- Render Player Area ---
+            function renderPlayerArea() {
+                console.log(`renderPlayerArea called. playingIndex: ${playingIndex}`);
+                const videoContainer = document.getElementById('videos');
+                if (!videoContainer) { console.error("#videos container not found."); return; }
+                videoContainer.innerHTML = '';
+                stopTimer();
+
+                isLoadingNewVideo = true; // Set loading flag
+                expectedStartTime = 0;    // Reset expected time
+                console.log("renderPlayerArea: Set isLoadingNewVideo = true");
+
+                // --- Add Controls ---
+                if (videoList.length > 0) {
+                    const controls = document.createElement('div'); controls.className = 'controls';
+                    const prevBtn = document.createElement('button'); prevBtn.textContent = '<- Prev'; prevBtn.onclick = () => { playingIndex = (playingIndex - 1 + videoList.length) % videoList.length; renderPlayerArea(); };
+                    const nextBtn = document.createElement('button'); nextBtn.textContent = 'Next ->'; nextBtn.onclick = () => { playingIndex = (playingIndex + 1) % videoList.length; renderPlayerArea(); };
+                    if (videoList.length > 1) { controls.appendChild(prevBtn); controls.appendChild(nextBtn); }
+                    else { const span = document.createElement('span'); span.textContent = "(Single video)"; span.style.color = "grey"; controls.appendChild(span); }
+                    videoContainer.appendChild(controls);
+                } else {
+                    const msg = document.createElement('p'); msg.textContent = `(No associated videos for ${initiallySelectedImageFilename || 'selected image'})`; msg.style.color = "grey"; videoContainer.appendChild(msg);
+                    currentVideoSortedTimings = []; if (player && typeof player.destroy === 'function') { player.destroy(); player = null; }
+                    // REMOVED timeDisplay update here
+                    isLoadingNewVideo = false; // No video, not loading
+                    return;
+                }
+
+                // --- Get Video Info ---
+                const currentVideoLinkInfo = videoList[playingIndex];
+                const videoId = extractVideoId(currentVideoLinkInfo.youtube_link);
+                if (!videoId) { console.error("Invalid video ID for:", currentVideoLinkInfo.youtube_link); /* ... error msg ... */ isLoadingNewVideo = false; return; }
+
+                // --- Get Current Image & Calculate Start Time ---
+                const mainImageElement = document.getElementById('image');
+                const currentTrackedImageFilename = mainImageElement ? mainImageElement.alt : null;
+                let startTime = 0;
+                if (currentTrackedImageFilename && imageToVideoMap[currentTrackedImageFilename]) {
+                     const links = imageToVideoMap[currentTrackedImageFilename]; const link = links.find(l => extractVideoId(l.youtube_link) === videoId);
+                     startTime = (link && typeof link.timing !== 'undefined') ? link.timing : (currentVideoLinkInfo.timing || 0);
+                } else { startTime = currentVideoLinkInfo.timing || 0; }
+                startTime = Number(startTime) || 0;
+                expectedStartTime = startTime; // Store expected time
+                console.log(`renderPlayerArea: Calculated startTime = ${startTime}s, stored as expectedStartTime.`);
+
+                // --- Preemptive UI Updates ---
+                if (mainImageElement && currentTrackedImageFilename) { const targetSrc = `${imagesUrl}/${currentTrackedImageFilename}`; if (mainImageElement.src !== targetSrc || mainImageElement.alt !== currentTrackedImageFilename) { mainImageElement.src = targetSrc; mainImageElement.alt = currentTrackedImageFilename; } }
+                if (currentTrackedImageFilename) { let targetThumb = null; document.querySelectorAll('#images img').forEach(img => { const file = img.dataset.imageFile || img.src.split('/').pop(); if (file === currentTrackedImageFilename) { img.classList.add('selected'); targetThumb = img; } else { img.classList.remove('selected'); } }); if (targetThumb) { targetThumb.scrollIntoView({ behavior: 'auto', block: 'nearest' }); } }
+
+                // --- Build Timings & Create Placeholders ---
+                buildSortedTimingsForVideo(videoId);
+                const playerWrapper = document.createElement('div'); playerWrapper.className = 'player-container-wrapper'; const playerDiv = document.createElement('div'); playerDiv.id = 'youtube-player'; playerWrapper.appendChild(playerDiv); videoContainer.appendChild(playerWrapper);
+                // REMOVED timeDisplay creation
+
+                // --- Create Player ---
+                if (ytApiReady) {
+                    try {
+                        if (player && typeof player.destroy === 'function') { player.destroy(); player = null; }
+                        const origin = window.location.origin;
+                        player = new YT.Player('youtube-player', { height: '100%', width: '100%', videoId: videoId, playerVars: { 'playsinline': 1, 'autoplay': 1, 'start': Math.floor(startTime), 'origin': origin, 'rel': 0 }, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
+                    } catch (error) {
+                         console.error("Error creating YT.Player:", error); isLoadingNewVideo = false;
+                         if (playerDiv) { playerDiv.textContent = "Error creating player."; playerDiv.style.color = "red"; }
+                         // REMOVED timeDisplay update
+                    }
+                } else {
+                     console.warn("YouTube API not ready..."); isLoadingNewVideo = false;
+                     if (playerDiv) { playerDiv.textContent = "YouTube API loading..."; /* ... styles ... */ }
+                     // REMOVED timeDisplay update
+                }
+
+                // --- Add Title ---
+                 if (!DEBUG_NO_TITLES) {
+                     const videoTitleDiv=document.createElement('div'); videoTitleDiv.className='video-title'; videoTitleDiv.textContent='Loading title...'; videoContainer.appendChild(videoTitleDiv);
+                     fetchYouTubeTitle(videoId,(title)=>{
+                         console.log(`Callback received title for ${videoId}: '${title}'`);
+                         if(document.body.contains(videoTitleDiv)) { videoTitleDiv.textContent=title||'Unknown Title'; }
+                         else { console.log(`Callback for ${videoId}: videoTitleDiv no longer in DOM.`); }
+                     });
+                 }
+            } // End of renderPlayerArea
+
+
+            // --- YouTube Player Event Handlers ---
+            function onPlayerReady(event) {
+                 console.log("Player Ready. isLoadingNewVideo:", isLoadingNewVideo);
+                 updateTimeDisplay(); // Update display state (may be skipped if loading)
+            }
+
+            function onPlayerStateChange(event) {
+                 console.log("Player state changed:", event.data, "isLoadingNewVideo:", isLoadingNewVideo);
+                if (event.data == YT.PlayerState.PLAYING) {
+                    if (!isLoadingNewVideo) { startTimer(); }
+                    else { console.log("onStateChange(PLAYING): Still loading, timer deferred."); updateTimeDisplay(); }
+                } else {
+                    stopTimer();
+                    if(event.data === YT.PlayerState.ENDED && isLoadingNewVideo) { isLoadingNewVideo = false; console.log("onStateChange(ENDED): Reset isLoadingNewVideo."); }
+                    updateTimeDisplay(); // Update status display
+                }
+            }
+
+            // --- Timer Functions ---
+            function startTimer() {
+                 if (isLoadingNewVideo) { console.log("startTimer: Prevented (isLoadingNewVideo=true)"); return; }
+                 if (timeUpdater) return; // Prevent multiple timers
+                 console.log("Starting timer");
+                 // stopTimer(); // Technically redundant if check above works, but safe
+                 if (player && typeof player.getCurrentTime === 'function') {
+                    updateTimeDisplay(); // Update once immediately
+                    timeUpdater = setInterval(updateTimeDisplay, 250);
+                 }
+            }
+
+            function stopTimer() {
+                if (timeUpdater) {
+                    console.log("Stopping timer");
+                    clearInterval(timeUpdater);
+                    timeUpdater = null;
+                }
+            }
+
+            // --- Update Time Display and SYNC IMAGE ---
+            function updateTimeDisplay() {
+                // REMOVED reference to timeDisplay
+                const mainImageElement = document.getElementById('image');
+                // Modified check:
+                if (!mainImageElement) return;
+
+                let videoTime = -1;
+                let playerState = YT.PlayerState.UNSTARTED;
+
+                if (player && typeof player.getCurrentTime === 'function') {
+                    videoTime = player.getCurrentTime();
+                    if (typeof player.getPlayerState === 'function') { playerState = player.getPlayerState(); }
+                } else {
+                     // REMOVED timeDisplay update
+                     console.warn("updateTimeDisplay: Player not ready or unavailable."); return;
+                }
+
+                // --- JUMP PREVENTION LOGIC ---
+                if (isLoadingNewVideo && playerState !== YT.PlayerState.ENDED && expectedStartTime > 0) {
+                    if (videoTime < SEEK_TOLERANCE && expectedStartTime > SEEK_TOLERANCE * 1.5) { // Still near 0 when expecting later start
+                         console.log(`updateTimeDisplay: PREVENTED UI update (near 0). Time:${videoTime.toFixed(2)}s, Expected:${expectedStartTime.toFixed(2)}s`);
+                         // REMOVED timeDisplay update
+                         return;
+                    }
+                    if (videoTime >= expectedStartTime - SEEK_TOLERANCE) { // Time is now close enough
+                         console.log(`updateTimeDisplay: Loading check passed. Time:${videoTime.toFixed(2)}s, Expected:${expectedStartTime.toFixed(2)}s. Resetting flag.`);
+                         isLoadingNewVideo = false;
+                         if (playerState === YT.PlayerState.PLAYING && !timeUpdater) { startTimer(); } // Start timer if playing now
+                    } else { // Still seeking, time is > SEEK_TOLERANCE but < expectedStart - SEEK_TOLERANCE
+                         console.log(`updateTimeDisplay: PREVENTED UI update (seeking). Time:${videoTime.toFixed(2)}s, Expected:${expectedStartTime.toFixed(2)}s`);
+                         // REMOVED timeDisplay update
+                         return;
+                    }
+                } else if (isLoadingNewVideo && expectedStartTime === 0) { // Expected start was 0, allow immediately
+                     isLoadingNewVideo = false; console.log("updateTimeDisplay: Expected start 0, resetting flag.");
+                     if (playerState === YT.PlayerState.PLAYING && !timeUpdater) { startTimer(); }
+                }
+                // --- END JUMP PREVENTION LOGIC ---
+
+                // --- Proceed with regular UI updates ---
+                const imageFilename = findImageForTime(videoTime);
+                if (imageFilename) {
+                    const newImageSrc = `${imagesUrl}/${imageFilename}`;
+                    if (mainImageElement.src !== newImageSrc || mainImageElement.alt !== imageFilename) {
+                         // console.log(`updateTimeDisplay: Updating UI. Time: ${videoTime.toFixed(2)}s, Image: ${imageFilename}`); // Less verbose log
+                         mainImageElement.src = newImageSrc; mainImageElement.alt = imageFilename;
+                         document.querySelectorAll('#images img').forEach(img => {
+                              const imgFile = img.dataset.imageFile || img.src.split('/').pop();
+                              if (imgFile === imageFilename) { if (!img.classList.contains('selected')) { img.classList.add('selected'); img.scrollIntoView({ behavior: 'auto', block: 'nearest' }); }}
+                              else { img.classList.remove('selected'); }
+                         });
+                    }
+                }
+
+                // Format display strings (info still available, just not displayed in #time-display)
+                const videoTimeString = videoTime >= 0 ? videoTime.toFixed(2) : "--.--";
+                const imageNameString = mainImageElement.alt || "---";
+                let statusPrefix = "";
+                if (playerState === YT.PlayerState.PAUSED) statusPrefix = "Paused "; else if (playerState === YT.PlayerState.ENDED) statusPrefix = "Ended "; else if (playerState === YT.PlayerState.BUFFERING) statusPrefix = "Buffering "; else if (playerState === YT.PlayerState.CUED) statusPrefix = "Cued "; else if (playerState === YT.PlayerState.UNSTARTED) statusPrefix = "Unstarted ";
+
+                // REMOVED line setting timeDisplay.textContent
+
+                // Optional log to see the info that *would* have been displayed:
+                // console.log(`Status: ${statusPrefix || 'Playing '}Time: ${videoTimeString}s / Img: ${imageNameString}`);
+
+            }
+
+
+            // --- Initial Setup ---
+            function initialize() {
+                 fetch(imageListPath).then(r => r.ok ? r.json() : Promise.reject(`Fail ${r.status} ${imageListPath}`))
+                 .then(imgData => { return fetch(timingsPath).then(r => r.ok ? r.json() : Promise.reject(`Fail ${r.status} ${timingsPath}`))
+                 .then(timeData => { imageToVideoMap = timeData; const images = imgData[name] || []; if (images.length === 0) { console.warn("No images for", name); const cont=document.getElementById('images'); if(cont) cont.textContent="No images found."; return; }
+                 const sorted = images.sort((a, b) => { const nA=parseInt(a.match(/(\d+)/)?.[1]||0); const nB=parseInt(b.match(/(\d+)/)?.[1]||0); return nA - nB; });
+                 const imgCont = document.getElementById('images'); imgCont.innerHTML = ''; sorted.forEach((f, i) => { const img = document.createElement('img'); img.src = `${imagesUrl}/${f}`; img.alt = `Image ${i+1}: ${f}`; img.dataset.imageFile = f; img.loading = 'lazy'; img.addEventListener('click', () => loadImageAndVideos(f)); imgCont.appendChild(img); });
+                 if (sorted.length > 0) { setTimeout(() => loadImageAndVideos(sorted[0]), 250); } }) })
+                 .catch(error => { console.error('Init Error:', error); const imgSect=document.getElementById('image-section'); if(imgSect) imgSect.innerHTML=`<h1>Error</h1><p style="color:red;">Failed initial data: ${error.message}</p>`; const viewSect=document.getElementById('viewer-section'); if(viewSect) viewSect.innerHTML=`<p style="color:red;">Failed data load.</p>`; });
+            }
+
+            initialize();
+
+        }); // End of DOMContentLoaded
+    </script>
+
+</body>
+</html>

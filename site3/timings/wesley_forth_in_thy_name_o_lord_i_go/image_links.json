@@ -1,0 +1,22 @@
+{
+  "staff_0.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=3-rzDAJTl9c",
+      "timing": 0.4
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=Tm7ydvukHH4",
+      "timing": 0.4
+    }
+  ],
+  "staff_1.png": [
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=3-rzDAJTl9c",
+      "timing": 15.7
+    },
+    {
+      "youtube_link": "https://www.youtube.com/watch?v=Tm7ydvukHH4",
+      "timing": 11.4475
+    }
+  ]
+}
