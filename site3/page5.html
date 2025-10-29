@@ -191,6 +191,7 @@
             let videoList = []; // Holds video choices for the *originally selected* image
             let playingIndex = 0; // Index within videoList
             let initiallySelectedImageFilename = null;
+            let currentVideoId = null; // MODIFICATION: Track the current YouTube video ID
             // --- STATE VARIABLES for jump prevention ---
             let isLoadingNewVideo = false; // True when Prev/Next/Initial load is seeking
             let expectedStartTime = 0;     // The time the player SHOULD start at
@@ -238,6 +239,25 @@
             // --- Load Image and Associated Videos ---
             function loadImageAndVideos(imageFilename) {
                 console.log("loadImageAndVideos called for:", imageFilename);
+
+                // --- START OF MODIFICATION ---
+                const newVideoList = imageToVideoMap[imageFilename] || [];
+                let newPlayingIndex = 0; // Default to 0
+
+                // If a video is currently playing, try to find it in the new image's video list
+                if (player && currentVideoId) {
+                    const matchingIndex = newVideoList.findIndex(videoInfo => extractVideoId(videoInfo.youtube_link) === currentVideoId);
+
+                    if (matchingIndex !== -1) {
+                        // If a match is found, use its index instead of resetting to 0
+                        console.log(`Found matching video for ${currentVideoId} at new index ${matchingIndex}.`);
+                        newPlayingIndex = matchingIndex;
+                    } else {
+                        console.log(`No match for ${currentVideoId} in the new video list. Resetting to index 0.`);
+                    }
+                }
+                // --- END OF MODIFICATION ---
+
                 initiallySelectedImageFilename = imageFilename;
                 isLoadingNewVideo = false; // Reset state for fresh selection
                 expectedStartTime = 0;
@@ -251,8 +271,10 @@
                      else { img.classList.remove('selected'); }
                 });
                 if (Object.keys(imageToVideoMap).length === 0) { console.warn("imageToVideoMap is empty."); renderPlayerArea(); return; }
-                videoList = imageToVideoMap[imageFilename] || [];
-                playingIndex = 0;
+                
+                videoList = newVideoList; // Use the new list
+                playingIndex = newPlayingIndex; // MODIFICATION: Use the newly calculated index
+
                 renderPlayerArea();
             }
 
@@ -278,8 +300,7 @@
                     videoContainer.appendChild(controls);
                 } else {
                     const msg = document.createElement('p'); msg.textContent = `(No associated videos for ${initiallySelectedImageFilename || 'selected image'})`; msg.style.color = "grey"; videoContainer.appendChild(msg);
-                    currentVideoSortedTimings = []; if (player && typeof player.destroy === 'function') { player.destroy(); player = null; }
-                    // REMOVED timeDisplay update here
+                    currentVideoSortedTimings = []; if (player && typeof player.destroy === 'function') { player.destroy(); player = null; currentVideoId = null; } // MODIFICATION: Clear currentVideoId
                     isLoadingNewVideo = false; // No video, not loading
                     return;
                 }
@@ -287,6 +308,7 @@
                 // --- Get Video Info ---
                 const currentVideoLinkInfo = videoList[playingIndex];
                 const videoId = extractVideoId(currentVideoLinkInfo.youtube_link);
+                currentVideoId = videoId; // MODIFICATION: Set the current video ID
                 if (!videoId) { console.error("Invalid video ID for:", currentVideoLinkInfo.youtube_link); /* ... error msg ... */ isLoadingNewVideo = false; return; }
 
                 // --- Get Current Image & Calculate Start Time ---
@@ -308,7 +330,6 @@
                 // --- Build Timings & Create Placeholders ---
                 buildSortedTimingsForVideo(videoId);
                 const playerWrapper = document.createElement('div'); playerWrapper.className = 'player-container-wrapper'; const playerDiv = document.createElement('div'); playerDiv.id = 'youtube-player'; playerWrapper.appendChild(playerDiv); videoContainer.appendChild(playerWrapper);
-                // REMOVED timeDisplay creation
 
                 // --- Create Player ---
                 if (ytApiReady) {
@@ -319,12 +340,10 @@
                     } catch (error) {
                          console.error("Error creating YT.Player:", error); isLoadingNewVideo = false;
                          if (playerDiv) { playerDiv.textContent = "Error creating player."; playerDiv.style.color = "red"; }
-                         // REMOVED timeDisplay update
                     }
                 } else {
                      console.warn("YouTube API not ready..."); isLoadingNewVideo = false;
                      if (playerDiv) { playerDiv.textContent = "YouTube API loading..."; /* ... styles ... */ }
-                     // REMOVED timeDisplay update
                 }
 
                 // --- Add Title ---
@@ -362,7 +381,6 @@
                  if (isLoadingNewVideo) { console.log("startTimer: Prevented (isLoadingNewVideo=true)"); return; }
                  if (timeUpdater) return; // Prevent multiple timers
                  console.log("Starting timer");
-                 // stopTimer(); // Technically redundant if check above works, but safe
                  if (player && typeof player.getCurrentTime === 'function') {
                     updateTimeDisplay(); // Update once immediately
                     timeUpdater = setInterval(updateTimeDisplay, 250);
@@ -379,9 +397,7 @@
 
             // --- Update Time Display and SYNC IMAGE ---
             function updateTimeDisplay() {
-                // REMOVED reference to timeDisplay
                 const mainImageElement = document.getElementById('image');
-                // Modified check:
                 if (!mainImageElement) return;
 
                 let videoTime = -1;
@@ -391,7 +407,6 @@
                     videoTime = player.getCurrentTime();
                     if (typeof player.getPlayerState === 'function') { playerState = player.getPlayerState(); }
                 } else {
-                     // REMOVED timeDisplay update
                      console.warn("updateTimeDisplay: Player not ready or unavailable."); return;
                 }
 
@@ -399,7 +414,6 @@
                 if (isLoadingNewVideo && playerState !== YT.PlayerState.ENDED && expectedStartTime > 0) {
                     if (videoTime < SEEK_TOLERANCE && expectedStartTime > SEEK_TOLERANCE * 1.5) { // Still near 0 when expecting later start
                          console.log(`updateTimeDisplay: PREVENTED UI update (near 0). Time:${videoTime.toFixed(2)}s, Expected:${expectedStartTime.toFixed(2)}s`);
-                         // REMOVED timeDisplay update
                          return;
                     }
                     if (videoTime >= expectedStartTime - SEEK_TOLERANCE) { // Time is now close enough
@@ -408,7 +422,6 @@
                          if (playerState === YT.PlayerState.PLAYING && !timeUpdater) { startTimer(); } // Start timer if playing now
                     } else { // Still seeking, time is > SEEK_TOLERANCE but < expectedStart - SEEK_TOLERANCE
                          console.log(`updateTimeDisplay: PREVENTED UI update (seeking). Time:${videoTime.toFixed(2)}s, Expected:${expectedStartTime.toFixed(2)}s`);
-                         // REMOVED timeDisplay update
                          return;
                     }
                 } else if (isLoadingNewVideo && expectedStartTime === 0) { // Expected start was 0, allow immediately
@@ -422,7 +435,6 @@
                 if (imageFilename) {
                     const newImageSrc = `${imagesUrl}/${imageFilename}`;
                     if (mainImageElement.src !== newImageSrc || mainImageElement.alt !== imageFilename) {
-                         // console.log(`updateTimeDisplay: Updating UI. Time: ${videoTime.toFixed(2)}s, Image: ${imageFilename}`); // Less verbose log
                          mainImageElement.src = newImageSrc; mainImageElement.alt = imageFilename;
                          document.querySelectorAll('#images img').forEach(img => {
                               const imgFile = img.dataset.imageFile || img.src.split('/').pop();
@@ -431,18 +443,6 @@
                          });
                     }
                 }
-
-                // Format display strings (info still available, just not displayed in #time-display)
-                const videoTimeString = videoTime >= 0 ? videoTime.toFixed(2) : "--.--";
-                const imageNameString = mainImageElement.alt || "---";
-                let statusPrefix = "";
-                if (playerState === YT.PlayerState.PAUSED) statusPrefix = "Paused "; else if (playerState === YT.PlayerState.ENDED) statusPrefix = "Ended "; else if (playerState === YT.PlayerState.BUFFERING) statusPrefix = "Buffering "; else if (playerState === YT.PlayerState.CUED) statusPrefix = "Cued "; else if (playerState === YT.PlayerState.UNSTARTED) statusPrefix = "Unstarted ";
-
-                // REMOVED line setting timeDisplay.textContent
-
-                // Optional log to see the info that *would* have been displayed:
-                // console.log(`Status: ${statusPrefix || 'Playing '}Time: ${videoTimeString}s / Img: ${imageNameString}`);
-
             }
 
 
