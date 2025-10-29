@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -182,6 +183,28 @@
             const DEBUG_NO_TITLES = false; // Keep false to enable title fetching
             const params = new URLSearchParams(window.location.search);
             const name = params.get('name') || 'default';
+
+            // --- START OF TITLE MODIFICATION ---
+            // Function to format the piece name for display
+            function formatPieceName(rawName) {
+                if (!rawName || rawName === 'default') {
+                    return "Music Piece";
+                }
+                // Replace underscores with spaces and capitalize each word
+                return rawName
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, char => char.toUpperCase());
+            }
+
+            // Set the titles dynamically
+            const pieceTitle = formatPieceName(name);
+            document.title = pieceTitle; // Set the page tab title
+            const mainHeader = document.querySelector('#image-section h1');
+            if (mainHeader) {
+                mainHeader.textContent = pieceTitle; // Set the on-page H1 title
+            }
+            // --- END OF TITLE MODIFICATION ---
+
             const imagesUrl = `images/${name}`;
             const imageListPath = 'images.json';
             const timingsPath = `timings/${name}/image_links.json`;
@@ -191,7 +214,7 @@
             let videoList = []; // Holds video choices for the *originally selected* image
             let playingIndex = 0; // Index within videoList
             let initiallySelectedImageFilename = null;
-            let currentVideoId = null; // MODIFICATION: Track the current YouTube video ID
+            let currentVideoId = null; // Track the current YouTube video ID
             // --- STATE VARIABLES for jump prevention ---
             let isLoadingNewVideo = false; // True when Prev/Next/Initial load is seeking
             let expectedStartTime = 0;     // The time the player SHOULD start at
@@ -240,7 +263,6 @@
             function loadImageAndVideos(imageFilename) {
                 console.log("loadImageAndVideos called for:", imageFilename);
 
-                // --- START OF MODIFICATION ---
                 const newVideoList = imageToVideoMap[imageFilename] || [];
                 let newPlayingIndex = 0; // Default to 0
 
@@ -256,7 +278,6 @@
                         console.log(`No match for ${currentVideoId} in the new video list. Resetting to index 0.`);
                     }
                 }
-                // --- END OF MODIFICATION ---
 
                 initiallySelectedImageFilename = imageFilename;
                 isLoadingNewVideo = false; // Reset state for fresh selection
@@ -273,7 +294,7 @@
                 if (Object.keys(imageToVideoMap).length === 0) { console.warn("imageToVideoMap is empty."); renderPlayerArea(); return; }
                 
                 videoList = newVideoList; // Use the new list
-                playingIndex = newPlayingIndex; // MODIFICATION: Use the newly calculated index
+                playingIndex = newPlayingIndex; // Use the newly calculated index
 
                 renderPlayerArea();
             }
@@ -300,7 +321,7 @@
                     videoContainer.appendChild(controls);
                 } else {
                     const msg = document.createElement('p'); msg.textContent = `(No associated videos for ${initiallySelectedImageFilename || 'selected image'})`; msg.style.color = "grey"; videoContainer.appendChild(msg);
-                    currentVideoSortedTimings = []; if (player && typeof player.destroy === 'function') { player.destroy(); player = null; currentVideoId = null; } // MODIFICATION: Clear currentVideoId
+                    currentVideoSortedTimings = []; if (player && typeof player.destroy === 'function') { player.destroy(); player = null; currentVideoId = null; }
                     isLoadingNewVideo = false; // No video, not loading
                     return;
                 }
@@ -308,7 +329,7 @@
                 // --- Get Video Info ---
                 const currentVideoLinkInfo = videoList[playingIndex];
                 const videoId = extractVideoId(currentVideoLinkInfo.youtube_link);
-                currentVideoId = videoId; // MODIFICATION: Set the current video ID
+                currentVideoId = videoId; // Set the current video ID
                 if (!videoId) { console.error("Invalid video ID for:", currentVideoLinkInfo.youtube_link); /* ... error msg ... */ isLoadingNewVideo = false; return; }
 
                 // --- Get Current Image & Calculate Start Time ---
